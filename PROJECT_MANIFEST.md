@@ -1,440 +1,197 @@
-# GRC Platform - Project Manifest
+# Project Manifest
 
-## Project Overview
+## GRC208 AWS Integrated GRC Platform
 
-The AWS Integrated GRC Platform is a comprehensive capstone project for GRC208 students. This document provides a complete inventory of all project files and their purposes.
+|                       |                                                                 |
+|-----------------------|-----------------------------------------------------------------|
+|**Name**               |Emmanuella Ebubechukwu                                           |
+|**Student ID**         |2025/GRC/10041                                                   |
+|**Course**             |GRC208 - Governance, Risk, and Compliance                        |
+|**Institution**        |International Cybersecurity and Digital Forensics Academy (ICDFA)|
+|**Instructor**         |Aminu Idris                                                      |
+|**Date Deployed**      |April 9, 2026                                                    |
+|**Submission Deadline**|April 21, 2026                                                   |
+|**Environment**        |AWS Free Tier Personal Account                                   |
+|**AWS Account ID**     |562923011251                                                     |
+|**Region**             |us-east-1 (N. Virginia)                                          |
+|**IAM User**           |emmanuella-admin                                                 |
 
-## Project Statistics
+-----
 
-- **Total Files**: 12
-- **Documentation Files**: 5
-- **Code Files**: 3
-- **Configuration Files**: 2
-- **Data Files**: 1
-- **Script Files**: 1
+## Repository Overview
+
+This repository contains the complete submission for the GRC208 capstone project. It includes all infrastructure templates, application code, documentation, test cases, sample data, architecture diagrams, and deployment screenshots. Everything needed to understand, evaluate, and replicate this deployment is contained here.
+
+-----
 
 ## File Inventory
 
-### Documentation Files
-
-#### 1. README.md
-**Purpose**: Main project documentation and overview
-**Contents**:
-- Project overview and objectives
-- Key features and technology stack
-- Quick start guide
-- Architecture overview
-- Learning outcomes
-- References and resources
-
-**Size**: ~8 KB
-**Status**: Complete
-
-#### 2. DEPLOYMENT_GUIDE.md
-**Purpose**: Step-by-step deployment instructions
-**Contents**:
-- Prerequisites and requirements
-- Architecture overview
-- Phase-by-phase deployment steps
-- Configuration instructions
-- Testing and validation procedures
-- Troubleshooting guide
-- Post-deployment steps
-
-**Size**: ~12 KB
-**Status**: Complete
-
-#### 3. BEST_PRACTICES.md
-**Purpose**: Implementation best practices and guidelines
-**Contents**:
-- AWS best practices
-- Security best practices
-- Compliance best practices
-- Operational best practices
-- Development best practices
-- Compliance framework integration
-- Continuous improvement strategies
-
-**Size**: ~10 KB
-**Status**: Complete
-
-#### 4. AWS_SERVICES_GUIDE.md
-**Purpose**: Detailed explanation of AWS services used
-**Contents**:
-- Overview of each AWS service
-- Key features and benefits
-- GRC platform usage
-- Integration patterns
-- Performance considerations
-- Cost optimization strategies
-
-**Size**: ~14 KB
-**Status**: Complete
-
-#### 5. architecture_design.md
-**Purpose**: System architecture and design documentation
-**Contents**:
-- Project overview
-- Architecture approach
-- Core components
-- System modules
-- Technology stack
-- Deployment strategy
-- Learning objectives
-
-**Size**: ~4 KB
-**Status**: Complete
-
-### Code Files
-
-#### 1. lambda_compliance_monitor.py
-**Purpose**: AWS Lambda function for compliance monitoring
-**Contents**:
-- ComplianceMonitor class for AWS Config integration
-- RiskAssessmentEngine class for risk scoring
-- Lambda handler functions
-- DynamoDB integration
-- SNS alert functionality
-- Comprehensive logging
-
-**Lines of Code**: ~350
-**Status**: Production-ready
-**Dependencies**: boto3, logging, json
-
-#### 2. test_cases.py
-**Purpose**: Comprehensive test suite for GRC platform
-**Contents**:
-- TestComplianceMonitoring: Compliance calculation tests
-- TestRiskAssessment: Risk scoring tests
-- TestDataValidation: Data validation tests
-- TestDatabaseOperations: Database structure tests
-- TestComplianceFrameworks: Framework mapping tests
-- TestAuditLogging: Audit log tests
-- TestReportGeneration: Report generation tests
-- TestIntegration: Integration workflow tests
-
-**Test Cases**: 25+
-**Status**: Complete
-**Coverage**: Core functionality
-
-#### 3. deploy.sh
-**Purpose**: Automated deployment script
-**Contents**:
-- Prerequisite checking
-- AWS credential verification
-- Network stack deployment
-- Database stack deployment
-- Lambda function deployment
-- AWS Config setup
-- CloudTrail configuration
-- Deployment verification
-
-**Lines of Code**: ~200
-**Status**: Production-ready
-**Executable**: Yes
-
-### Configuration Files
-
-#### 1. cloudformation-network-stack.yaml
-**Purpose**: CloudFormation template for network infrastructure
-**Contents**:
-- VPC configuration
-- Public and private subnets
-- Internet Gateway
-- NAT Gateway
-- Route tables
-- Security groups (ALB, ECS, RDS)
-
-**Resources**: 15+
-**Status**: Production-ready
-**Outputs**: VPC ID, Subnet IDs, Security Group IDs
-
-#### 2. cloudformation-database-stack.yaml
-**Purpose**: CloudFormation template for database infrastructure
-**Contents**:
-- RDS MySQL database
-- Database subnet group
-- KMS encryption keys
-- S3 buckets (evidence, reports)
-- DynamoDB tables (compliance, risks, controls)
-- Lifecycle policies
-- Encryption configuration
-
-**Resources**: 12+
-**Status**: Production-ready
-**Outputs**: Database endpoint, bucket names, table names
-
-### Data Files
-
-#### 1. sample_data.sql
-**Purpose**: Sample data for database initialization
-**Contents**:
-- Table creation scripts
-- Sample frameworks (ISO 27001, NIST, PCI DSS, HIPAA, GDPR, SOC 2)
-- Sample controls (30+ controls across frameworks)
-- Sample risks (6 risks with scoring)
-- Sample assets (6 critical assets)
-- Sample audit logs
-- Database views for reporting
-- Performance indexes
-
-**Records**: 50+
-**Status**: Complete
-**Database**: MySQL 8.0
-
-### Dependency Files
-
-#### 1. requirements.txt
-**Purpose**: Python package dependencies
-**Contents**:
-- boto3: AWS SDK
-- botocore: AWS SDK core
-- python-dotenv: Environment variable management
-- mysql-connector-python: MySQL database driver
-- pymysql: Alternative MySQL driver
-- requests: HTTP library
-- click: CLI framework
-- colorama: Terminal colors
-- tabulate: Table formatting
-- pyyaml: YAML parsing
-
-**Total Packages**: 10
-**Status**: Complete
-
-## File Organization
-
-```
-grc-capstone-project/
-├── Documentation/
-│   ├── README.md                          (Main documentation)
-│   ├── DEPLOYMENT_GUIDE.md                (Deployment instructions)
-│   ├── BEST_PRACTICES.md                  (Best practices)
-│   ├── AWS_SERVICES_GUIDE.md              (Service explanations)
-│   ├── architecture_design.md             (Architecture)
-│   └── PROJECT_MANIFEST.md                (This file)
-│
-├── Infrastructure/
-│   ├── cloudformation-network-stack.yaml  (Network setup)
-│   └── cloudformation-database-stack.yaml (Database setup)
-│
-├── Code/
-│   ├── lambda_compliance_monitor.py       (Compliance monitoring)
-│   ├── test_cases.py                      (Test suite)
-│   └── deploy.sh                          (Deployment script)
-│
-├── Data/
-│   └── sample_data.sql                    (Sample data)
-│
-└── Configuration/
-    └── requirements.txt                   (Python dependencies)
-```
-
-## File Relationships
-
-```
-README.md (Start here)
-    ↓
-DEPLOYMENT_GUIDE.md (Follow deployment steps)
-    ↓
-cloudformation-network-stack.yaml (Deploy network)
-    ↓
-cloudformation-database-stack.yaml (Deploy database)
-    ↓
-sample_data.sql (Load sample data)
-    ↓
-lambda_compliance_monitor.py (Deploy Lambda)
-    ↓
-test_cases.py (Run tests)
-    ↓
-BEST_PRACTICES.md (Review best practices)
-    ↓
-AWS_SERVICES_GUIDE.md (Understand services)
-```
-
-## Development Workflow
-
-### For Students
-
-1. **Read Documentation**
-   - Start with README.md
-   - Review architecture_design.md
-   - Read AWS_SERVICES_GUIDE.md
-
-2. **Understand Architecture**
-   - Review CloudFormation templates
-   - Study Lambda function code
-   - Examine sample data structure
-
-3. **Deploy Infrastructure**
-   - Follow DEPLOYMENT_GUIDE.md
-   - Execute deploy.sh or manual steps
-   - Verify deployment
-
-4. **Load Sample Data**
-   - Execute sample_data.sql
-   - Verify data in database
-
-5. **Run Tests**
-   - Execute test_cases.py
-   - Review test results
-   - Fix any issues
-
-6. **Explore Platform**
-   - Access GRC application
-   - Review compliance status
-   - Generate reports
-
-### For Instructors
-
-1. **Review Project**
-   - Check all documentation
-   - Verify code quality
-   - Test deployment process
-
-2. **Prepare for Class**
-   - Set up AWS environment
-   - Deploy infrastructure
-   - Prepare demo data
-
-3. **Teach Students**
-   - Walk through architecture
-   - Demonstrate deployment
-   - Show AWS services
-
-4. **Grade Assignments**
-   - Review student modifications
-   - Test deployments
-   - Evaluate understanding
-
-## Key Concepts Covered
-
-### Governance
-- Framework management
-- Control implementation
-- Policy tracking
-- Role-based access
-
-### Risk Management
-- Risk identification
-- Risk assessment and scoring
-- Mitigation tracking
-- Risk reporting
-
-### Compliance
-- Framework mapping
-- Compliance monitoring
-- Automated checks
-- Compliance reporting
-
-### AWS Services
-- CloudFormation (IaC)
-- VPC and networking
-- RDS and databases
-- Lambda and serverless
-- S3 and storage
-- DynamoDB and NoSQL
-- Config and monitoring
-- CloudTrail and auditing
-- IAM and security
-- KMS and encryption
-
-## Learning Outcomes
-
-Upon completing this project, students will be able to:
-
-1. Design cloud architectures for GRC applications
-2. Implement AWS native security services
-3. Write Infrastructure as Code
-4. Develop serverless applications
-5. Implement compliance monitoring
-6. Map controls to frameworks
-7. Create automated compliance checking
-8. Manage cloud security and governance
-
-## Testing and Validation
-
-### Test Coverage
-- Compliance monitoring: 3 tests
-- Risk assessment: 3 tests
-- Data validation: 4 tests
-- Database operations: 3 tests
-- Framework mapping: 2 tests
-- Audit logging: 3 tests
-- Report generation: 2 tests
-- Integration workflows: 2 tests
-
-**Total Tests**: 25+
-**Pass Rate Target**: 100%
-
-### Deployment Validation
-- Network stack creation
-- Database stack creation
-- Lambda function deployment
-- AWS Config setup
-- CloudTrail configuration
-- Data loading verification
-- Test suite execution
-
-## Documentation Quality
-
-- **Completeness**: 100%
-- **Clarity**: High
-- **Examples**: Included
-- **Code Comments**: Comprehensive
-- **Diagrams**: Included
-- **References**: Provided
-
-## File Sizes
-
-| File | Size | Type |
-|------|------|------|
-| README.md | 8 KB | Documentation |
-| DEPLOYMENT_GUIDE.md | 12 KB | Documentation |
-| BEST_PRACTICES.md | 10 KB | Documentation |
-| AWS_SERVICES_GUIDE.md | 14 KB | Documentation |
-| architecture_design.md | 4 KB | Documentation |
-| lambda_compliance_monitor.py | 12 KB | Code |
-| test_cases.py | 15 KB | Code |
-| cloudformation-network-stack.yaml | 8 KB | Configuration |
-| cloudformation-database-stack.yaml | 10 KB | Configuration |
-| sample_data.sql | 6 KB | Data |
-| deploy.sh | 7 KB | Script |
-| requirements.txt | 0.3 KB | Configuration |
-
-**Total Project Size**: ~106 KB
-
-## Version History
-
-### Version 1.0 (March 2026)
-- Initial release
-- Core GRC platform
-- AWS Config integration
-- Compliance monitoring
-- Risk assessment
-- Audit logging
-- Complete documentation
-
-## Maintenance and Updates
-
-### Regular Updates
-- Monthly: Review and update documentation
-- Quarterly: Update AWS SDK versions
-- Annually: Review and update best practices
-
-### Support
-- Documentation: Comprehensive
-- Examples: Included
-- Test cases: Provided
-- Troubleshooting: Documented
-
-## Conclusion
-
-This project manifest provides a complete inventory of all project files and their purposes. Students should use this document as a reference guide to understand the project structure and navigate between components.
-
-For questions or clarifications, refer to the specific documentation files or consult with your instructor.
-
----
-
-**Last Updated**: March 2026
-**Status**: Complete and Production-Ready
-**Maintenance**: Actively Maintained
+### Infrastructure Files
+
+|File                                |Description                                                                                                                                                                  |Lines|
+|------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----|
+|`cloudformation-network-stack.yaml` |Deploys the VPC, public and private subnets across two availability zones, internet gateway, NAT gateway, application load balancer, and all associated security groups      |174  |
+|`cloudformation-database-stack.yaml`|Deploys the RDS MySQL instance, two S3 buckets for evidence and reports, and three DynamoDB tables. This is the Free Tier compatible version that was fixed during deployment|143  |
+
+### Application Code
+
+|File                          |Description                                                                                                                                                                                                                                                       |Lines|
+|------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----|
+|`lambda_compliance_monitor.py`|AWS Lambda function that monitors compliance status, calculates compliance percentages, counts non-compliant rules, and returns a structured JSON response                                                                                                        |250  |
+|`grc-dashboard.jsx`           |React component for the GRC platform frontend dashboard. Displays compliance status, risk register, and control implementation tracking. Included in the repository as a deliverable but frontend deployment requires ECS Fargate which is outside Free Tier scope|299  |
+|`grc-dashboard.css`           |Stylesheet for the GRC dashboard component. Included alongside grc-dashboard.jsx as a complete frontend deliverable                                                                                                                                               |275  |
+
+### Testing
+
+|File           |Description                                                                                                                                                                                           |Lines|
+|---------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----|
+|`test_cases.py`|22 test cases covering compliance monitoring, risk assessment, data validation, database operations, framework mapping, audit logging, report generation, and integration workflows. All 22 tests pass|341  |
+
+### Data and Configuration
+
+|File              |Description                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+|------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+|`sample_data.sql` |SQL script containing sample GRC data for loading into the RDS MySQL database including frameworks, controls, risks, assets, and compliance snapshots. The file is included in the repository as a deliverable. Direct loading into RDS was not possible from CloudShell because the RDS instance sits in a private subnet with no route to the internet gateway. Sample data was loaded into DynamoDB directly instead and all 22 tests passed successfully|
+|`requirements.txt`|Python dependencies required for the Lambda function and test suite                                                                                                                                                                                                                                                                                                                                                                                         |
+|`deploy.sh`       |Shell script for automated deployment of all five phases. Included in the repository as a reference deliverable. Manual deployment through CloudShell was used instead since the script assumes an environment with direct RDS access which was not available on this Free Tier account                                                                                                                                                                     |
+
+### Documentation
+
+|File                     |Description                                                                                                                             |
+|-------------------------|----------------------------------------------------------------------------------------------------------------------------------------|
+|`README.md`              |Main project overview including deployment summary, AWS resources deployed, test results, challenges and fixes, and repository structure|
+|`DEPLOYMENT_GUIDE.md`    |Full record of the deployment process including every command run, every error encountered, and every fix applied                       |
+|`BEST_PRACTICES.md`      |AWS and GRC best practices observed and applied during this deployment                                                                  |
+|`AWS_SERVICES_GUIDE.md`  |Explanation of each AWS service used in this project and its role in the GRC platform                                                   |
+|`PROJECT_MANIFEST.md`    |This file. Complete inventory of all project files, deployed resources, and submission details                                          |
+|`DELIVERY_SUMMARY.md`    |Project completion summary covering all deliverables and their status                                                                   |
+|`architecture_design.md` |System architecture documentation covering design decisions, component interactions, and data flow                                      |
+|`architecture-diagram.md`|Mermaid diagrams illustrating the system architecture                                                                                   |
+
+### Diagrams Folder
+
+|File                                   |Description                                                              |
+|---------------------------------------|-------------------------------------------------------------------------|
+|`diagrams/01_system_architecture.png`  |Full system architecture showing all AWS services and their relationships|
+|`diagrams/02_data_flow.png`            |Data flow diagram showing how information moves through the platform     |
+|`diagrams/03_risk_assessment.png`      |Risk assessment process diagram                                          |
+|`diagrams/04_security_architecture.png`|Security architecture showing network segmentation and access controls   |
+|`diagrams/05_deployment_pipeline.png`  |Deployment pipeline diagram showing the five phases                      |
+|`diagrams/06_compliance_dashboard.png` |Compliance dashboard layout and data sources                             |
+|`diagrams/07_aws_access_options.png`   |AWS access options diagram                                               |
+
+### Screenshots Folder
+
+All 23 deployment screenshots are stored in the `screenshots/` folder. They cover the full deployment from identity verification through to final service confirmation.
+
+|Screenshot                                      |What It Shows                                                                    |
+|------------------------------------------------|---------------------------------------------------------------------------------|
+|`01_identity_verified`                          |AWS account identity confirmed via aws sts get-caller-identity                   |
+|`02_repo_cloned`                                |Instructor repository cloned and all project files listed                        |
+|`03_network_stack_create_complete`              |Phase 1 network stack showing CREATE_COMPLETE status                             |
+|`04_network_stack_outputs`                      |Network stack outputs table showing VPC, subnet, and security group IDs          |
+|`05_database_stack_create_complete`             |Phase 2 database stack showing CREATE_COMPLETE status                            |
+|`06_database_stack_outputs`                     |Database stack outputs showing RDS endpoint, S3 buckets, and DynamoDB tables     |
+|`07_lambda_function_created`                    |Phase 3 Lambda function creation output showing function ARN and configuration   |
+|`08_lambda_invocation_test`                     |Lambda test invocation returning StatusCode 200 and compliance monitoring message|
+|`09_config_recorder_running`                    |Phase 4 AWS Config recorder status showing CONTINUOUS recording                  |
+|`10_cloudtrail_created`                         |CloudTrail trail creation output showing trail name and S3 bucket                |
+|`11_cloudtrail_logging`                         |CloudTrail status showing IsLogging: True                                        |
+|`12_dynamodb_data_loaded`                       |Phase 5 DynamoDB table scans showing all three tables populated with sample data |
+|`13_tests_passing`                              |Test suite output showing 22 tests run and all passing                           |
+|`14_console_cloudformation_both_stacks_complete`|AWS Console CloudFormation page showing both stacks with CREATE_COMPLETE         |
+|`15_console_database_stack_outputs`             |AWS Console database stack Outputs tab                                           |
+|`16_console_network_stack_outputs`              |AWS Console network stack Outputs tab                                            |
+|`17_console_lambda_function`                    |AWS Console Lambda functions page showing grc-compliance-monitor                 |
+|`18_console_config_recording`                   |AWS Console Config Settings page showing Recording is on                         |
+|`19_console_cloudtrail_logging`                 |AWS Console CloudTrail Trails page showing grc-trail with logging enabled        |
+|`20_console_s3_buckets`                         |AWS Console S3 buckets list showing all three GRC buckets                        |
+|`21_console_dynamodb_tables`                    |AWS Console DynamoDB tables list showing all three GRC tables                    |
+|`22_console_iam_user`                           |AWS Console IAM Users page showing emmanuella-admin                              |
+|`23_final_verification`                         |CloudShell final verification showing all five services confirmed active         |
+
+-----
+
+## Deployed AWS Resources
+
+### Network Stack: grc-capstone-network-stack
+
+|Resource          |Type          |ID                      |
+|------------------|--------------|------------------------|
+|GRC VPC           |VPC           |vpc-00204003995d48e34   |
+|Public Subnet 1   |Subnet        |subnet-0e6c4823316500b67|
+|Public Subnet 2   |Subnet        |subnet-0f1683e183304d7ee|
+|Private Subnet 1  |Subnet        |subnet-0bb3889421244130e|
+|Private Subnet 2  |Subnet        |subnet-0c79c9a2301e854e2|
+|RDS Security Group|Security Group|sg-064802794fa337415    |
+|ECS Security Group|Security Group|sg-0771599d1db672c25    |
+
+### Database Stack: grc-capstone-database-stack
+
+|Resource               |Type            |Value                                                   |
+|-----------------------|----------------|--------------------------------------------------------|
+|GRC Database           |RDS MySQL 8.0.40|grc-capstone-db.cyrou02g6leq.us-east-1.rds.amazonaws.com|
+|Evidence Bucket        |S3              |grc-capstone-evidence-562923011251                      |
+|Reports Bucket         |S3              |grc-capstone-reports-562923011251                       |
+|Compliance Status Table|DynamoDB        |grc-compliance-status                                   |
+|Risk Register Table    |DynamoDB        |grc-risk-register                                       |
+|Controls Table         |DynamoDB        |grc-controls                                            |
+
+### Lambda
+
+|Resource          |Type           |Value                 |
+|------------------|---------------|----------------------|
+|Compliance Monitor|Lambda Function|grc-compliance-monitor|
+|Lambda Role       |IAM Role       |grc-lambda-role       |
+|Runtime           |Python         |3.11                  |
+
+### Monitoring and Audit
+
+|Resource               |Type      |Value                           |
+|-----------------------|----------|--------------------------------|
+|Config Recorder        |AWS Config|grc-recorder                    |
+|Config Role            |IAM Role  |grc-config-role                 |
+|Config Delivery Channel|AWS Config|grc-channel                     |
+|Audit Trail            |CloudTrail|grc-trail                       |
+|CloudTrail Bucket      |S3        |grc-cloudtrail-logs-562923011251|
+
+-----
+
+## Test Summary
+
+|Category             |Tests |Result        |
+|---------------------|------|--------------|
+|Compliance Monitoring|3     |Passed        |
+|Risk Assessment      |3     |Passed        |
+|Data Validation      |4     |Passed        |
+|Database Operations  |3     |Passed        |
+|Framework Mapping    |2     |Passed        |
+|Audit Logging        |3     |Passed        |
+|Report Generation    |2     |Passed        |
+|Integration Workflows|2     |Passed        |
+|**Total**            |**22**|**All Passed**|
+
+-----
+
+## Compliance Frameworks Supported
+
+|Framework                   |Standard                                           |
+|----------------------------|---------------------------------------------------|
+|ISO 27001                   |Information Security Management System             |
+|NIST Cybersecurity Framework|Risk management and security controls              |
+|PCI DSS                     |Payment Card Industry Data Security Standard       |
+|HIPAA                       |Health Insurance Portability and Accountability Act|
+|GDPR                        |General Data Protection Regulation                 |
+|SOC 2                       |Service Organization Control Framework             |
+
+-----
+
+## Deployment Issues Resolved
+
+|Issue                                                                 |Resolution                                                                                                                                                               |
+|----------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+|Database stack ROLLBACK_COMPLETE due to invalid S3 encryption property|Fixed the property name using sed, then replaced the full template with a Free Tier compatible version                                                                   |
+|AWS Config InsufficientDeliveryPolicyException                        |Created dedicated grc-config-role with AWS_ConfigRole policy and applied explicit S3 bucket policy for config.amazonaws.com                                              |
+|CloudTrail InsufficientS3BucketPolicyException                        |Applied explicit S3 bucket policy allowing cloudtrail.amazonaws.com to write to the logs bucket                                                                          |
+|GitHub push rejected due to divergent branch history                  |Deleted the remote README and force pushed using git push –force                                                                                                         |
+|RDS direct connection not possible from CloudShell                    |RDS sits in a private subnet with no internet gateway route. Sample data was loaded into DynamoDB directly instead. All 22 tests passed confirming platform functionality|
