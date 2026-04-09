@@ -99,7 +99,9 @@ aws cloudformation create-stack \
   --region us-east-1
 ```
 
-Note: Use the fixed `cloudformation-database-stack.yaml` from this repository, not the original instructor version. See Challenges and Fixes below.
+Note: The cloudformation-database-stack.yaml in this repository has been updated 
+to resolve Free Tier compatibility issues encountered during deployment. 
+See Challenges and Fixes for full details.
 
 **Step 4 — Deploy the Lambda function**
 
