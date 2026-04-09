@@ -1,0 +1,143 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: GRC Platform Database Stack - Free Tier Compatible
+
+Parameters:
+  EnvironmentName:
+    Type: String
+    Default: grc-capstone
+  DBUsername:
+    Type: String
+    Default: grcadmin
+  DBPassword:
+    Type: String
+    NoEcho: true
+
+Resources:
+  DBSubnetGroup:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupDescription: GRC Platform DB Subnet Group
+      SubnetIds:
+        - !ImportValue grc-capstone-private-subnet-1-id
+        - !ImportValue grc-capstone-private-subnet-2-id
+
+  GRCDatabase:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      DBInstanceIdentifier: !Sub ${EnvironmentName}-db
+      DBInstanceClass: db.t3.micro
+      Engine: mysql
+      EngineVersion: 8.0.40
+      MasterUsername: !Ref DBUsername
+      MasterUserPassword: !Ref DBPassword
+      AllocatedStorage: 20
+      StorageType: gp2
+      StorageEncrypted: false
+      BackupRetentionPeriod: 0
+      DeletionProtection: false
+      MultiAZ: false
+      PubliclyAccessible: false
+      DBSubnetGroupName: !Ref DBSubnetGroup
+      VPCSecurityGroups:
+        - !ImportValue grc-capstone-rds-sg-id
+      DBName: grcdb
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName}-database
+
+  EvidenceBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub ${EnvironmentName}-evidence-${AWS::AccountId}
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName}-evidence
+
+  ComplianceReportsBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub ${EnvironmentName}-reports-${AWS::AccountId}
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName}-reports
+
+  ComplianceStatusTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: grc-compliance-status
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: complianceId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: complianceId
+          KeyType: HASH
+
+  RiskRegisterTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: grc-risk-register
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: riskId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: riskId
+          KeyType: HASH
+
+  ControlsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: grc-controls
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: controlId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: controlId
+          KeyType: HASH
+
+Outputs:
+  DatabaseEndpoint:
+    Description: RDS Database Endpoint
+    Value: !GetAtt GRCDatabase.Endpoint.Address
+    Export:
+      Name: grc-capstone-db-endpoint
+
+  EvidenceBucketName:
+    Description: Evidence S3 Bucket
+    Value: !Ref EvidenceBucket
+    Export:
+      Name: grc-capstone-evidence-bucket
+
+  ComplianceReportsBucketName:
+    Description: Compliance Reports S3 Bucket
+    Value: !Ref ComplianceReportsBucket
+    Export:
+      Name: grc-capstone-reports-bucket
+
+  ComplianceStatusTableName:
+    Description: DynamoDB Compliance Status Table
+    Value: !Ref ComplianceStatusTable
+    Export:
+      Name: grc-capstone-compliance-table
+
+  RiskRegisterTableName:
+    Description: DynamoDB Risk Register Table
+    Value: !Ref RiskRegisterTable
+    Export:
+      Name: grc-capstone-risk-table
+
+  ControlsTableName:
+    Description: DynamoDB Controls Table
+    Value: !Ref ControlsTable
+    Export:
+      Name: grc-capstone-controls-table
