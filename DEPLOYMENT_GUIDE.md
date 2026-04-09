@@ -8,7 +8,6 @@
 |**Student ID**         |2025/GRC/10041                                                   |
 |**Course**             |GRC208 - Governance, Risk, and Compliance                        |
 |**Institution**        |International Cybersecurity and Digital Forensics Academy (ICDFA)|
-|**Instructor**         |Aminu Idris                                                      |
 |**Date Deployed**      |April 9, 2026                                                    |
 |**Environment**        |AWS Free Tier Personal Account                                   |
 |**AWS Account ID**     |562923011251                                                     |
