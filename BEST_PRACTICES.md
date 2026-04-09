@@ -1,347 +1,155 @@
 # Best Practices
 
-## GRC208 Capstone: AWS Integrated GRC Platform
+## GRC208 AWS Integrated GRC Platform
 
-## Student Information
-- **Name:** Emmanuella Ebubechukwu
-- **Student ID:** 2025/GRC/10041
-- **Course:** GRC208 - Governance, Risk, and Compliance
-- **Institution:** International Cybersecurity and Digital Forensics Academy (ICDFA)
-- **Date Deployed:** March 24, 2026
-- **Environment:** AWS Academy Learner Lab
-- **Region:** us-east-1 (N. Virginia)
+### Emmanuella Ebubechukwu | 2025/GRC/10041
+
+|                 |                                                                 |
+|-----------------|-----------------------------------------------------------------|
+|**Name**         |Emmanuella Ebubechukwu                                           |
+|**Student ID**   |2025/GRC/10041                                                   |
+|**Course**       |GRC208 - Governance, Risk, and Compliance                        |
+|**Institution**  |International Cybersecurity and Digital Forensics Academy (ICDFA)|
+|**Date Deployed**|April 9, 2026                                                    |
+|**Environment**  |AWS Free Tier Personal Account                                   |
+|**Region**       |us-east-1 (N. Virginia)                                          |
 
 -----
 
 ## AWS Best Practices
 
-### Use Infrastructure as Code for Everything
+### Define Your Infrastructure Before You Deploy It
 
-Every resource in this platform was defined in CloudFormation
-templates rather than created manually through the AWS Console.
-This means the entire infrastructure can be deleted and redeployed
-from scratch with a single command, and every configuration
-decision is documented in version-controlled files.
+Before this project, I understood Infrastructure as Code as a concept. After watching a CloudFormation stack fail twice and having to fix the template each time, I understood it as a discipline.
 
-When the database stack failed five times during deployment, the
-fix was made to the template file itself, not patched around.
-That discipline meant the final deployed state matched exactly
-what was in the code.
+When the database stack rolled back the first time, I fixed the S3 encryption property. When it rolled back again, I replaced the entire template with a version that actually worked on Free Tier. Both fixes went into the file, not into the console. That meant when the stack finally deployed successfully, what was running in AWS matched exactly what was written in the code. That kind of certainty is only possible when everything lives in a template.
 
-Always commit your CloudFormation templates to version control
-before deploying. If a stack fails, the error is in the template.
-Fix it there, not in the console.
+If you find yourself making changes directly in the AWS Console to get something working, stop and ask yourself why you are not making that change in the template instead.
 
-### Check Available Service Versions Before Deploying
+### A Budget Alert Is Not Optional
 
-The database stack originally specified MySQL version 8.0.35.
-This version is not available in the AWS Academy Learner Lab
-environment, which caused repeated deployment failures. Before
-hardcoding any service version into a CloudFormation template,
-verify what is actually available in your target environment:
+I set a $10 billing alert before I ran a single CloudFormation command. This was not just a precaution. It was a deliberate decision made after understanding that an RDS instance does not know when you have forgotten about it. It keeps running and it keeps charging.
 
-```bash
-aws rds describe-db-engine-versions \
-  --engine mysql \
-  --query 'DBEngineVersions[*].EngineVersion'
-```
+On a Free Tier account, unexpected costs almost always mean something is running that should not be. On a production account, unexpected costs can mean something far more serious. Either way, you want to know the moment it happens, not at the end of the month when the bill arrives.
 
-This applies to any versioned service, including Lambda runtimes, RDS
-engine versions, ECS task definition revisions. Never assume a
-version is available until you have confirmed it.
+Set the alert first. Then deploy.
 
-### Use the Right Tool for Each Job
+### Never Work as Root
 
-This platform uses three different storage services because each
-one serves a different purpose:
+I created the `emmanuella-admin` IAM user and worked through that account for everything. The root account has no guardrails. There is no policy you can attach to it, no permission boundary that constrains it, and no easy way to recover from a mistake made under it.
 
-- **RDS MySQL** handles structured relational data, including frameworks,
-  controls, risks, assets and audit logs. These have relationships
-  between them that require a relational database.
-- **DynamoDB** handles real-time compliance status. It is faster
-  than querying RDS for data that changes frequently and needs to
-  be read instantly by the dashboard.
-- **S3** handles evidence documents and audit logs. Object storage
-  is the right choice for files that need long-term retention,
-  versioning and cheap retrieval.
+Working as a named IAM user also means every action is attributed to `emmanuella-admin` in CloudTrail. That is useful during an audit and it is useful if something goes wrong and you need to trace what happened.
 
-Using DynamoDB for everything or RDS for everything would have
-been the wrong approach. Match the storage service to the data
-type and access pattern.
+### Enable MFA and Do Not Skip It
 
-### Design for Private Networking from the Start
+I enabled MFA on `emmanuella-admin` before starting the deployment. It feels like an extra step when you are in a hurry to get things running but it is the kind of control you are glad you put in place before something goes wrong, not after.
 
-RDS and Lambda are deployed in private subnets with no direct
-internet access. The NAT Gateway handles any outbound calls they
-need to make. This design decision meant that when it came time
-to load data into RDS from CloudShell, direct access was blocked,
-which is exactly what private subnet design is supposed to do.
+A password alone is one stolen credential away from a full account compromise. MFA makes that significantly harder. Under ISO 27001 and NIST it is also a documented control requirement, which means skipping it is not just a security gap but a compliance gap.
 
-The solution was to create a VPC-connected Lambda function that
-runs inside the private network. This is the production-correct
-approach. Designing for private networking from the start forced
-a better solution than if access had been left open.
+### Give Each Service Only What It Needs
 
-### Always Verify After Deploying
+This was a lesson Phase 4 made very clear. I tried to use the Lambda IAM role for the AWS Config recorder and got back an InsufficientDeliveryPolicyException. The fix required understanding why it failed.
 
-After each phase, run a verification command before moving on.
-Do not assume a deployment succeeded because no error appeared:
+Config needs to assume a role with `config.amazonaws.com` as the trusted principal. Lambda needs `lambda.amazonaws.com`. These are different services with different trust relationships and they need different roles. When you blur those boundaries, things break in ways that are hard to diagnose if you do not understand why the boundary exists.
+
+Create a dedicated role for each service. Scope it to exactly what that service needs.
+
+### Verify Every Phase Before Moving to the Next
+
+After each stack deployment I ran a status check and pulled the outputs before starting the next phase. The database stack imports subnet and security group IDs from the network stack. If I had started Phase 2 without confirming Phase 1 outputs were available, Phase 2 would have failed immediately with a cross-stack reference error.
+
+Checking outputs at each stage catches problems early before they cascade into harder failures later.
+
+### Read the Error Before You Fix It
+
+Both times the database stack rolled back, I ran the describe-stack-events command before touching anything:
 
 ```bash
-# Confirm stack status
-aws cloudformation describe-stacks \
-  --stack-name grc-database-stack \
-  --query 'Stacks[0].StackStatus'
-
-# Confirm RDS is available
-aws rds describe-db-instances \
-  --query 'DBInstances[0].DBInstanceStatus'
-
-# Confirm Lambda is active
-aws lambda get-function \
-  --function-name grc-compliance-monitor \
-  --query 'Configuration.State'
-
-# Confirm CloudTrail is logging
-aws cloudtrail get-trail-status \
-  --name grc-audit-trail \
-  --query 'IsLogging'
+aws cloudformation describe-stack-events \
+  --stack-name grc-capstone-database-stack \
+  --region us-east-1 \
+  --query 'StackEvents[?ResourceStatus==`CREATE_FAILED`].[ResourceType,ResourceStatusReason]' \
+  --output table
 ```
 
-Each command should return the expected value before the next
-phase begins. Catching a problem at the verification step is
-much faster than discovering it three phases later.
+The first error pointed to exactly which property was wrong. The second showed the structure itself was invalid. Both times, reading the error pointed directly to the fix. The error message is not the problem. It is the answer.
 
 -----
 
 ## Security Best Practices
 
-### Never Store Credentials in Code
+### Keep Credentials Out of Your Code
 
-No passwords, access keys or connection strings appear anywhere
-in this codebase. The database password is passed as a
-CloudFormation parameter at deployment time and never written
-into a file that gets committed to GitHub.
+The database password was passed as a CloudFormation parameter at deployment time and exists nowhere in any file in this repository. A single password accidentally committed to a public GitHub repository can result in full account compromise within minutes. Automated bots scan public repositories continuously looking for exactly this kind of exposure.
 
-Lambda functions connect to RDS using the endpoint and
-credentials passed through environment variables, not hardcoded
-strings. Before pushing anything to a public repository,
-confirm that no credentials are present in any file.
+If you are ever unsure whether a file contains credentials before pushing, check it manually. That few minutes of caution is worth it.
 
-### Use IAM Roles Instead of Access Keys
+### Encrypt Storage Even When It Feels Unnecessary
 
-Every service in this platform authenticates through IAM roles.
-Lambda assumes the LabRole to interact with DynamoDB, RDS and
-S3. No access keys are created, stored or rotated. This removes
-an entire category of credential exposure risk.
+The original database template used KMS encryption which was not compatible with a Free Tier account. Rather than deploying without encryption, I switched to AES256 server-side encryption for the S3 buckets. The data is still encrypted at rest. The mechanism is different but the protection is real.
 
-In a production environment outside the Learner Lab, create a
-dedicated IAM role for each service with only the permissions
-that service actually needs. The LabRole was used here because
-it is the only role available in the sandbox environment.
+Encryption at rest is not just a compliance checkbox. If the underlying storage were ever accessed without going through the application layer, encrypted data is unreadable without the key.
 
-### Encrypt Everything at Rest
+### Apply Bucket Policies That Actually Restrict Access
 
-All three storage services in this platform are encrypted:
+Both the evidence bucket and the CloudTrail logs bucket have explicit bucket policies that only allow the specific services that need them. Config can write to the evidence bucket. CloudTrail can write to the logs bucket. Nothing else has permission to write to either.
 
-- RDS uses a KMS key created by the database CloudFormation stack
-- Both S3 buckets have server-side encryption enabled using KMS
-- DynamoDB tables are encrypted at rest by default
-
-Encryption at rest means that if the underlying storage were
-ever accessed directly, the data would be unreadable without
-the KMS key. KMS key rotation is configured so the encryption
-key changes automatically over time.
-
-### Enforce Least Privilege Through Security Groups
-
-The RDS security group (sg-0e9455394d5b6c9f3) allows inbound
-traffic on port 3306 only from the ECS security group
-(sg-0e63951b8ee7375cd). Nothing else can reach the database:
-not the internet, not CloudShell, not any other service.
-
-This is the principle of least privilege applied at the network
-level. Each security group rule should only allow the minimum
-access required for the specific service that needs it.
-
-### Enable and Verify Audit Logging
-
-The CloudTrail audit trail (grc-audit-trail) was created and
-verified to be logging before the deployment was considered
-complete. Every API call made in the account is now recorded
-in the S3 compliance reports bucket.
-
-Enabling logging is not enough. Always verify it is actually
-working:
-
-```bash
-aws cloudtrail get-trail-status \
-  --name grc-audit-trail \
-  --query 'IsLogging'
-```
-
-An audit trail that is created but not started provides no
-protection. Verification should be part of every deployment
-checklist.
-
-### Enable S3 Versioning for Evidence Integrity
-
-Both S3 buckets in this platform have versioning enabled. This
-means that every upload creates a new version rather than
-overwriting the previous one. Evidence documents cannot be
-accidentally or intentionally deleted without leaving a trace.
-
-For compliance purposes, the ability to prove that a document
-has not been modified since it was stored is as important as
-the document itself. Versioning provides that guarantee.
+Both services failed until those policies were in place. That failure confirmed that the default state of these buckets is restrictive, which is exactly what you want. Permissions should be granted explicitly, not inherited by default.
 
 -----
 
 ## Compliance Best Practices
 
-### Map Controls to Frameworks at the Data Level
+### Continuous Monitoring Beats Scheduled Scanning
 
-The controls table in the grcdb database has a `framework_id`
-foreign key that links each control directly to its parent
-framework. This means a single SQL query can retrieve all
-controls for any given framework, or identify which controls
-satisfy requirements across multiple frameworks at once.
+AWS Config is running with continuous recording across all supported resource types. The moment any resource configuration changes, Config evaluates it. There is no gap between when a change happens and when it is detected.
 
-Hard-coding framework relationships in application logic instead
-of the database would have made the platform rigid. Storing
-them in the data model keeps the platform flexible as new
-frameworks are added.
+Compliance checked only once a week is a snapshot, not a posture. In a cloud environment where a misconfigured resource can be created and deleted in minutes, a weekly scan would miss it entirely. Continuous monitoring is the only approach that gives you an accurate picture at any given moment.
 
-### Automate Compliance Checking, Not Schedule It
+### Link Every Control to a Framework
 
-AWS Config checks compliance continuously, not on a schedule.
-The moment a resource configuration changes, Config evaluates
-it against the defined rules and the Lambda function calculates
-an updated risk score. There is no waiting for the next
-scheduled scan to discover a problem.
+The grc-controls DynamoDB table stores a framework field with every control record. This is not just an organisational choice. It is the difference between answering an auditor’s question in thirty seconds and spending hours searching for the answer.
 
-Scheduled compliance checks are a legacy pattern. In a cloud
-environment where resources can be created, modified and deleted
-in seconds, continuous monitoring is the only approach that
-provides real visibility.
+When you can query your controls table and immediately retrieve every control mapped to a specific framework, that is operationally useful. Controls that have no framework reference are hard to audit and hard to defend.
 
-### Document Limitations Honestly
+### Build Your Audit Trail Before You Need It
 
-The AWS Config delivery channel could not be configured in the
-Learner Lab environment because the LabRole lacks the required
-permissions. This limitation is documented clearly in this
-repository rather than hidden or worked around with a misleading
-alternative.
+CloudTrail was configured and verified as part of the deployment. Every API call made in the account since then is logged and stored. This means there is already a record of the deployment itself including every CloudFormation action, every IAM change, and every S3 bucket policy update.
 
-In a real compliance context, undocumented gaps are a liability.
-A documented gap with a compensating control (CloudTrail in
-this case) is a defensible position. Always document what you
-could not implement and explain what you did instead.
+You cannot reconstruct an audit trail after the fact. By the time you realise you need one, the events you needed to capture have already happened without being recorded.
 
-### Maintain a Complete Audit Trail at Every Layer
+### Document What Broke and How You Fixed It
 
-This platform captures audit events at three separate levels:
+Three things went wrong during this deployment. All three are documented in the deployment guide with the exact error messages and the exact commands used to resolve them.
 
-- **CloudTrail** records every AWS API call at the account level
-- **RDS audit_logs table** records every change to GRC data
-  including who made the change and when
-- **S3 versioning** preserves every version of every evidence
-  document uploaded to the buckets
+In a real GRC programme, honest documentation is what makes an organisation trustworthy during an audit. A gap that is documented with a clear resolution is a defensible position. A gap that is hidden is a liability.
 
-This layered approach means that even if one logging mechanism
-were compromised or unavailable, the other two would still
-provide a complete record. A single audit log is a single point
-of failure.
+### Compliance Requires Ongoing Attention
 
-### Set Retention Policies and Enforce Them
+Completing this deployment does not mean this environment is permanently compliant. Resources change, configurations drift, and requirements evolve. AWS Config is running continuously precisely because compliance is not something you achieve once and set aside.
 
-Log retention is configured to a minimum of 30 days across all
-logging mechanisms. In a production environment, compliance
-frameworks like ISO 27001 and PCI DSS specify minimum retention
-periods that are often longer. ISO 27001 typically requires
-one year for audit logs.
-
-Set retention policies when deploying, not as an afterthought.
-Logs that were never retained cannot be produced during an audit.
+Think of it less like passing a test and more like maintaining a standard.
 
 -----
 
 ## Operational Best Practices
 
-### Read Error Messages Before Taking Action
+### Test After Every Significant Change
 
-When the database CloudFormation stack failed, the instinct
-might be to delete and redeploy immediately. Instead, the
-correct approach is to read the stack events first:
-
-```bash
-aws cloudformation describe-stack-events \
-  --stack-name grc-database-stack \
-  --query 'StackEvents[?ResourceStatus==`CREATE_FAILED`].[LogicalResourceId,ResourceStatusReason]' \
-  --output table
-```
-
-This command showed exactly which resource failed and why:
-the S3 BucketEncryption indentation first, then the MySQL
-version. Deleting and redeploying without reading the error
-would have repeated the same failure.
-
-Always read the error before you fix it. The error message is
-the fastest path to the solution.
-
-### Never Redeploy a Phase That Already Completed
-
-CloudFormation stacks that reach CREATE_COMPLETE should not be
-redeployed unless there is a specific change to make. Attempting
-to create a stack that already exists will fail with an
-`AlreadyExistsException`.
-
-If you need to change a deployed stack, use `update-stack`
-rather than deleting and recreating it. If you must start fresh,
-delete the stack first and wait for the deletion to complete
-before redeploying.
-
-### Automate Testing and Run It Every Time
-
-The test suite covers 22 test cases across 6 categories. It
-takes 0.001 seconds to run. There is no reason not to run it
-after every significant change to the platform:
+The test suite runs in under a second. There is no justification for not running it:
 
 ```bash
 python3 test_cases.py
 ```
 
-Tests catch problems that manual verification misses. A
-compliance platform that cannot pass its own test suite should
-not be considered deployed. Run the tests, check the result,
-and investigate any failure before moving on.
+All 22 tests passing after deployment confirmed the platform was functioning as expected. Automated tests are not a formality. They are how you know the thing you built actually works.
 
-### Package Dependencies With Your Functions
+### Understand Your Environment Before You Deploy Into It
 
-Lambda functions do not have access to libraries that are not
-included in the deployment package. The `pymysql` library
-must be zipped together with the function code before deploying.
-This is not optional. A Lambda function that imports pymysql
-without packaging it will crash immediately on invocation.
+Free Tier has boundaries. KMS encryption adds cost. RDS on anything larger than db.t3.micro exceeds Free Tier. Some AWS Config rules carry a per-rule monthly charge. Knowing your environment means you can design for it rather than discovering its constraints through failures.
 
-Keep a record of every external dependency your functions
-require. Before deploying, confirm that all dependencies are
-present in the zip file and that their versions are compatible
-with the Lambda Python runtime you are targeting.
+### Know When to Replace Instead of Patch
 
-### Know the Boundaries of Your Environment
+After the second database stack failure I made a decision to stop trying to fix the original template and replace it entirely. The original had structural issues that went beyond a single property fix. Patching it further would have produced a harder to read template even if it eventually worked.
 
-The AWS Academy Learner Lab imposes restrictions that do not
-exist in a standard AWS account. Knowing these boundaries early
-prevents wasted time trying to fix something that is not broken:
-
-- AWS Config delivery channel creation requires permissions the
-  LabRole does not have
-- RDS cannot be reached directly from CloudShell due to VPC
-  private subnet placement
-- Learner Lab sessions expire and must be restarted. Always
-  check that credentials are still active before running commands
-
-Understanding your environment is as important as understanding
-your architecture. Work within the constraints, document them
-clearly, and move forward.
+Sometimes the cleanest solution is a fresh start. Knowing when you have crossed that line is a judgement call but it is worth making deliberately rather than spending another hour on a template that is working against you.
