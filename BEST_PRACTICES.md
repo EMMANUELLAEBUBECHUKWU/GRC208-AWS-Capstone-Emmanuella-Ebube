@@ -14,7 +14,7 @@ This document captures the AWS and GRC best practices I observed and applied dur
 
 The root account has unrestricted access to everything in an AWS account and cannot be limited by IAM policies. I created a dedicated IAM user called `emmanuella-admin` with AdministratorAccess and used that for the entire deployment. The root account was only used during the initial account setup.
 
-This is not just a recommendation — it is a basic access control principle. If the root account credentials were ever compromised, the damage would be total and irreversible.
+This is not just a recommendation, it is a basic access control principle. If the root account credentials were ever compromised, the damage would be total and irreversible.
 
 ### 2. Enable MFA Before Doing Anything Else
 
@@ -38,7 +38,7 @@ Manually clicking through the AWS Console to create resources is fine for learni
 
 Each AWS service in this project got its own dedicated IAM role with only the permissions it needed. The Lambda function got the basic execution role and Config access. The Config recorder got the AWS managed Config role. CloudTrail got its own S3 bucket policy.
 
-I learned this the hard way during Phase 4. When I tried to use the Lambda role for the Config recorder, it failed with an InsufficientDeliveryPolicyException. The fix was to create a dedicated role for Config with the correct trust policy pointing to config.amazonaws.com. Least privilege is not just a security principle — it is also what makes services actually work correctly.
+I learned this the hard way during Phase 4. When I tried to use the Lambda role for the Config recorder, it failed with an InsufficientDeliveryPolicyException. The fix was to create a dedicated role for Config with the correct trust policy pointing to config.amazonaws.com. Least privilege is not just a security principle, it is also what makes services actually work correctly.
 
 ### 6. Always Verify Stack Outputs Before Moving to the Next Phase
 
