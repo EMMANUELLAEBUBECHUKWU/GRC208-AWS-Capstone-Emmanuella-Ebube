@@ -2,17 +2,10 @@
 ## Capstone Project — Emmanuella Ebubechukwu
 
 **Student:** Emmanuella Ebubechukwu
-
 **Student ID:** 2025/GRC/10041
-
 **Programme:** GRC Engineering (CGRCE)
-
 **Institution:** International Cybersecurity and Digital Forensics Academy (ICDFA)
-
 **Course:** GRC208 — Governance, Risk, and Compliance Capstone
-
-**Instructor:** Aminu Idris
-
 **Submission Date:** April 21, 2026
 -----
 
