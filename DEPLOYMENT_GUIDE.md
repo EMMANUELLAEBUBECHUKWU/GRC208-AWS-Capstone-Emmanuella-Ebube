@@ -2,7 +2,18 @@
 
 ## GRC208 AWS Integrated GRC Platform
 
-### Emmanuella Ebubechukwu | 2025/GRC/10041
+|                       |                                                                 |
+|-----------------------|-----------------------------------------------------------------|
+|**Name**               |Emmanuella Ebubechukwu                                           |
+|**Student ID**         |2025/GRC/10041                                                   |
+|**Course**             |GRC208 - Governance, Risk, and Compliance                        |
+|**Institution**        |International Cybersecurity and Digital Forensics Academy (ICDFA)|
+|**Instructor**         |Aminu Idris                                                      |
+|**Date Deployed**      |April 9, 2026                                                    |
+|**Environment**        |AWS Free Tier Personal Account                                   |
+|**AWS Account ID**     |562923011251                                                     |
+|**Region**             |us-east-1 (N. Virginia)                                          |
+|**IAM User**           |emmanuella-admin                                                 |
 
 This document is a record of how I deployed the AWS Integrated GRC Platform for my GRC208 capstone. It covers every command I ran, every error I encountered, and exactly how I resolved each one. Anyone following this guide on a personal AWS Free Tier account should be able to replicate the same deployment without running into the same issues I did.
 
@@ -138,8 +149,6 @@ The sed replacement fixed the property name but the structure was still invalid.
 
 ```bash
 cat > cloudformation-database-stack.yaml << 'EOF'
-AWSTemplateFormatVersion: '2010-09-09'
-Description: GRC Platform Database Stack - Free Tier Compatible
 ...
 EOF
 ```
@@ -264,11 +273,11 @@ This phase sets up continuous compliance recording with AWS Config and full audi
 Using the Lambda role for the Config recorder caused this error:
 
 ```
-An error occurred (NoAvailableDeliveryChannelException): 
+An error occurred (NoAvailableDeliveryChannelException):
 Delivery channel is not available to start configuration recorder.
 
-An error occurred (InsufficientDeliveryPolicyException): 
-Insufficient delivery policy to s3 bucket: grc-capstone-evidence-562923011251, 
+An error occurred (InsufficientDeliveryPolicyException):
+Insufficient delivery policy to s3 bucket: grc-capstone-evidence-562923011251,
 unable to assume role: arn:aws:iam::562923011251:role/grc-lambda-role
 ```
 
@@ -353,7 +362,7 @@ aws s3 mb s3://grc-cloudtrail-logs-562923011251 --region us-east-1
 The first attempt to create the trail returned:
 
 ```
-An error occurred (InsufficientS3BucketPolicyException): 
+An error occurred (InsufficientS3BucketPolicyException):
 Incorrect S3 bucket policy is detected for bucket: grc-cloudtrail-logs-562923011251
 ```
 
@@ -413,7 +422,60 @@ Output confirmed IsLogging: True.
 
 ## Phase 5: Sample Data Loading
 
-I loaded sample records into all three DynamoDB tables to populate the GRC platform with initial data.
+### Attempted: Loading sample_data.sql into RDS
+
+The deployment guide specifies loading sample data into the RDS MySQL database using:
+
+```bash
+mysql -h $DB_ENDPOINT -u grcadmin -p < sample_data.sql
+```
+
+I attempted this after confirming the RDS endpoint was available. The connection failed with:
+
+```
+ERROR 2002 (HY000): Can't connect to MySQL server on
+'grc-capstone-db.cyrou02g6leq.us-east-1.rds.amazonaws.com' (115)
+```
+
+To investigate, I temporarily added an inbound rule to the RDS security group allowing port 3306 from the CloudShell IP address and modified the RDS instance to be publicly accessible:
+
+```bash
+aws ec2 authorize-security-group-ingress \
+  --group-id sg-064802794fa337415 \
+  --protocol tcp \
+  --port 3306 \
+  --cidr 3.94.196.117/32 \
+  --region us-east-1
+
+aws rds modify-db-instance \
+  --db-instance-identifier grc-capstone-db \
+  --publicly-accessible \
+  --apply-immediately \
+  --region us-east-1
+```
+
+The connection still failed. The root cause is that the RDS instance sits in a private subnet that has no route to the internet gateway. Even with the instance set to publicly accessible, the subnet routing prevents external connections from reaching it. This is the private subnet architecture working as designed.
+
+Both temporary changes were immediately reverted after the investigation:
+
+```bash
+aws rds modify-db-instance \
+  --db-instance-identifier grc-capstone-db \
+  --no-publicly-accessible \
+  --apply-immediately \
+  --region us-east-1
+
+aws ec2 revoke-security-group-ingress \
+  --group-id sg-064802794fa337415 \
+  --protocol tcp \
+  --port 3306 \
+  --cidr 3.94.196.117/32 \
+  --region us-east-1
+```
+
+### Alternative: Loading Sample Data into DynamoDB
+
+Since direct RDS access was not possible from CloudShell on this Free Tier account, sample data was loaded directly into the three DynamoDB tables instead:
 
 ```bash
 aws dynamodb put-item \
@@ -440,7 +502,7 @@ aws dynamodb scan --table-name grc-risk-register --region us-east-1 --output tab
 aws dynamodb scan --table-name grc-controls --region us-east-1 --output table
 ```
 
-All three tables returned their records correctly.
+All three tables returned their records correctly. The sample_data.sql file is included in the repository as a deliverable and would work as intended in an environment with direct database access such as through a bastion host or VPN connection into the VPC.
 
 -----
 
