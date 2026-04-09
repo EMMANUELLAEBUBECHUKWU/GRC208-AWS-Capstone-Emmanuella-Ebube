@@ -7,15 +7,18 @@
 **Programme:** GRC Engineering (CGRCE)
 **Institution:** International Cybersecurity and Digital Forensics Academy (ICDFA)
 **Course:** GRC208 — Governance, Risk, and Compliance Capstone
+**Instructor:** Aminu Idris
 **Submission Date:** April 21, 2026
 
 -----
 
 ## Project Overview
 
-This repository contains my capstone submission for GRC208. The project involved deploying a fully functional AWS Integrated GRC Platform from scratch on a personal AWS Free Tier account. The platform demonstrates practical implementation of governance, risk, and compliance management using AWS native services.
+This repository contains my capstone submission for GRC208. The project involved designing and deploying a fully functional AWS Integrated GRC Platform from scratch on a personal AWS Free Tier account. The platform demonstrates practical, hands-on implementation of governance, risk, and compliance management using AWS native services.
 
-The deployment was carried out entirely through AWS CloudShell using Infrastructure as Code (CloudFormation), with all five phases completed successfully and verified.
+Governance, Risk, and Compliance (GRC) is a critical function in any organisation that handles sensitive data or operates under regulatory requirements. This project translates GRC principles into a real cloud architecture — moving beyond theory to show how compliance monitoring, risk tracking, audit logging, and access control work together in a live environment.
+
+The deployment was carried out entirely through AWS CloudShell using Infrastructure as Code (CloudFormation). All five phases were completed successfully, verified, and documented with screenshots. The platform supports six major compliance frameworks: ISO 27001, NIST Cybersecurity Framework, PCI DSS, HIPAA, GDPR, and SOC 2.
 
 -----
 
@@ -30,9 +33,22 @@ The deployment was carried out entirely through AWS CloudShell using Infrastruct
 
 -----
 
+## Prerequisites
+
+The following were in place before deployment began:
+
+- Active AWS Free Tier account with a budget alert set at $10
+- IAM user `emmanuella-admin` created with AdministratorAccess
+- AWS CloudShell accessed directly from the AWS Management Console
+- GitHub repository created for submission
+- Personal Access Token generated for GitHub authentication
+- Instructor’s project files cloned from the ICDFA GitHub repository
+
+-----
+
 ## Deployment Summary
 
-All five phases were deployed successfully:
+All five phases were deployed successfully in sequence:
 
 |Phase  |Description                                            |Status  |
 |-------|-------------------------------------------------------|--------|
@@ -41,6 +57,72 @@ All five phases were deployed successfully:
 |Phase 3|Lambda Function — compliance monitoring                |Complete|
 |Phase 4|AWS Config and CloudTrail — audit logging and recording|Complete|
 |Phase 5|Sample Data Loading — DynamoDB tables populated        |Complete|
+
+Each phase was deployed using AWS CloudFormation and verified before proceeding to the next. Status checks were run after each stack creation to confirm `CREATE_COMPLETE` before moving forward.
+
+-----
+
+## How to Deploy
+
+Follow these steps to replicate this deployment in your own AWS account:
+
+**Step 1 — Clone the project files**
+
+```bash
+git clone https://github.com/icdfa/GRC208-AWS-Capstone-Project.git
+cd GRC208-AWS-Capstone-Project
+```
+
+**Step 2 — Deploy the network stack**
+
+```bash
+aws cloudformation create-stack \
+  --stack-name grc-capstone-network-stack \
+  --template-body file://cloudformation-network-stack.yaml \
+  --parameters ParameterKey=EnvironmentName,ParameterValue=grc-capstone \
+  --region us-east-1
+```
+
+**Step 3 — Deploy the database stack**
+
+```bash
+aws cloudformation create-stack \
+  --stack-name grc-capstone-database-stack \
+  --template-body file://cloudformation-database-stack.yaml \
+  --parameters \
+    ParameterKey=EnvironmentName,ParameterValue=grc-capstone \
+    ParameterKey=DBUsername,ParameterValue=grcadmin \
+    ParameterKey=DBPassword,ParameterValue=YourSecurePassword123! \
+  --capabilities CAPABILITY_IAM \
+  --region us-east-1
+```
+
+Note: Use the fixed `cloudformation-database-stack.yaml` from this repository, not the original instructor version. See Challenges and Fixes below.
+
+**Step 4 — Deploy the Lambda function**
+
+```bash
+zip -r lambda_compliance_monitor.zip lambda_compliance_monitor.py
+aws lambda create-function \
+  --function-name grc-compliance-monitor \
+  --runtime python3.11 \
+  --role arn:aws:iam::YOUR_ACCOUNT_ID:role/grc-lambda-role \
+  --handler lambda_compliance_monitor.lambda_handler \
+  --zip-file fileb://lambda_compliance_monitor.zip \
+  --timeout 60 \
+  --memory-size 256 \
+  --region us-east-1
+```
+
+**Step 5 — Set up AWS Config and CloudTrail**
+
+Create dedicated IAM roles for both services, apply S3 bucket policies, then start recording. Full commands are documented in `DEPLOYMENT_GUIDE.md`.
+
+**Step 6 — Load sample data and run tests**
+
+```bash
+python3 test_cases.py
+```
 
 -----
 
@@ -84,19 +166,66 @@ Ran 22 tests in 0.001s
 OK
 ```
 
-All 22 test cases passed across the following modules: Compliance Monitoring, Risk Assessment, Data Validation, Database Operations, Framework Mapping, Audit Logging, Report Generation, and Integration Workflows.
+All 22 test cases passed across the following modules:
+
+|Module               |Tests|Result|
+|---------------------|-----|------|
+|Compliance Monitoring|3    |Passed|
+|Risk Assessment      |3    |Passed|
+|Data Validation      |4    |Passed|
+|Database Operations  |3    |Passed|
+|Framework Mapping    |2    |Passed|
+|Audit Logging        |3    |Passed|
+|Report Generation    |2    |Passed|
+|Integration Workflows|2    |Passed|
 
 -----
 
 ## Challenges and Fixes
 
-During deployment, two issues were encountered and resolved:
+Three real-world issues were encountered and resolved during deployment:
 
-**1. Database Stack Rollback**
-The original `cloudformation-database-stack.yaml` failed due to an invalid S3 encryption property and KMS incompatibility on Free Tier. The template was replaced with a simplified Free Tier compatible version using AES256 encryption, `db.t3.micro` RDS instance, and no KMS key.
+**1. Database Stack Rollback — S3 Encryption and KMS Incompatibility**
 
-**2. AWS Config and CloudTrail Delivery Channel**
-Both services required dedicated IAM roles and explicit S3 bucket policies before the delivery channels could be created. A `grc-config-role` was created for AWS Config and a separate bucket policy was applied to the CloudTrail S3 bucket.
+The original `cloudformation-database-stack.yaml` failed with `ROLLBACK_COMPLETE` because the S3 bucket resource used an invalid encryption property and the KMS key configuration was not compatible with the Free Tier account. The template was replaced with a simplified Free Tier compatible version using AES256 server-side encryption, a `db.t3.micro` RDS instance class, no KMS key, and `BackupRetentionPeriod` set to 0. This resolved the issue and the stack deployed successfully on the next attempt.
+
+**2. AWS Config and CloudTrail Delivery Channel Errors**
+
+Both AWS Config and CloudTrail returned permission errors when trying to write to S3 using the Lambda IAM role. The fix involved creating a dedicated `grc-config-role` with the `AWS_ConfigRole` managed policy attached and `config.amazonaws.com` as the trusted service. A separate S3 bucket policy was also applied to explicitly allow `config.amazonaws.com` and `cloudtrail.amazonaws.com` to perform `s3:GetBucketAcl` and `s3:PutObject`. Once both roles and policies were in place, the delivery channels were created and recording started successfully.
+
+**3. GitHub Push Rejected — Divergent Branch History**
+
+When pushing the project files to GitHub, the push was initially rejected because the remote repository already contained an initial commit with a README file. This created divergent branch histories. The fix involved deleting the remote README and running a force push with `--force`, which successfully pushed all 34 project files to the repository.
+
+-----
+
+## Compliance Frameworks Covered
+
+|Framework                   |Description                                        |
+|----------------------------|---------------------------------------------------|
+|ISO 27001                   |Information Security Management System             |
+|NIST Cybersecurity Framework|Risk management and security controls              |
+|PCI DSS                     |Payment Card Industry Data Security Standard       |
+|HIPAA                       |Health Insurance Portability and Accountability Act|
+|GDPR                        |General Data Protection Regulation                 |
+|SOC 2                       |Service Organization Control Framework             |
+
+-----
+
+## Learning Outcomes
+
+Through this capstone deployment, I gained practical experience in the following areas:
+
+- Deploying cloud infrastructure using Infrastructure as Code with AWS CloudFormation
+- Understanding how network segmentation works in practice through VPC design with public and private subnets
+- Configuring serverless compliance monitoring using AWS Lambda
+- Setting up continuous compliance recording with AWS Config and audit logging with CloudTrail
+- Troubleshooting real CloudFormation deployment failures and applying targeted fixes
+- Managing IAM roles and S3 bucket policies to meet least-privilege access requirements
+- Mapping technical cloud controls to established compliance frameworks
+- Using Git and GitHub for version-controlled project submission
+
+This project reinforced that GRC in cloud environments is not just a documentation exercise. It requires practical understanding of how services interact, what permissions are needed, and how to diagnose and fix failures when they occur.
 
 -----
 
@@ -127,12 +256,20 @@ GRC208-AWS-Capstone-Emmanuella-Ebube/
 
 -----
 
-## Compliance Frameworks Covered
+## Screenshots
 
-ISO 27001, NIST Cybersecurity Framework, PCI DSS, HIPAA, GDPR, SOC 2
+All 23 deployment screenshots are available in the `screenshots/` folder. They cover every phase from identity verification through to final service verification, documented across both AWS CloudShell and the AWS Management Console.
 
 -----
 
-## Screenshots
+## Additional Documentation
 
-All deployment screenshots are available in the `screenshots/` folder. They cover every phase from identity verification through to final service verification across both CloudShell and the AWS Console.
+Full details for each section of this project are available in the following files:
+
+- `DEPLOYMENT_GUIDE.md` — step-by-step deployment instructions including all fixes applied
+- `BEST_PRACTICES.md` — AWS and GRC implementation best practices observed
+- `AWS_SERVICES_GUIDE.md` — detailed explanation of each AWS service used
+- `PROJECT_MANIFEST.md` — complete file inventory and project organisation
+- `DELIVERY_SUMMARY.md` — project completion summary and metadata
+- `architecture_design.md` — system architecture and design decisions
+- `architecture-diagram.md` — Mermaid architecture diagrams
