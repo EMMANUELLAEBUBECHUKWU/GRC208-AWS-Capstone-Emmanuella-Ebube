@@ -1,12 +1,16 @@
 # GRC208 AWS Integrated GRC Platform
+
 ## Capstone Project — Emmanuella Ebubechukwu
 
-**Student:** Emmanuella Ebubechukwu
-**Student ID:** 2025/GRC/10041
-**Programme:** GRC Engineering (CGRCE)
-**Institution:** International Cybersecurity and Digital Forensics Academy (ICDFA)
-**Course:** GRC208 — Governance, Risk, and Compliance Capstone
-**Submission Date:** April 21, 2026
+|                   |                                                                 |
+|-------------------|-----------------------------------------------------------------|
+|**Student**        |Emmanuella Ebubechukwu                                           |
+|**Student ID**     |2025/GRC/10041                                                   |
+|**Programme**      |GRC Engineering (CGRCE)                                          |
+|**Institution**    |International Cybersecurity and Digital Forensics Academy (ICDFA)|
+|**Course**         |GRC208 — Governance, Risk, and Compliance Capstone               |
+|**Submission Date**|April 21, 2026                                                   |
+
 -----
 
 ## Project Overview
@@ -36,6 +40,7 @@ The following were in place before deployment began:
 
 - Active AWS Free Tier account with a budget alert set at $10
 - IAM user `emmanuella-admin` created with AdministratorAccess
+- MFA enabled on the `emmanuella-admin` IAM user as a GRC security requirement
 - AWS CloudShell accessed directly from the AWS Management Console
 - GitHub repository created for submission
 - Personal Access Token generated for GitHub authentication
@@ -217,6 +222,7 @@ Through this capstone deployment, I gained practical experience in the following
 - Understanding how network segmentation works in practice through VPC design with public and private subnets
 - Configuring serverless compliance monitoring using AWS Lambda
 - Setting up continuous compliance recording with AWS Config and audit logging with CloudTrail
+- Implementing MFA and least-privilege IAM policies as foundational GRC security controls
 - Troubleshooting real CloudFormation deployment failures and applying targeted fixes
 - Managing IAM roles and S3 bucket policies to meet least-privilege access requirements
 - Mapping technical cloud controls to established compliance frameworks
