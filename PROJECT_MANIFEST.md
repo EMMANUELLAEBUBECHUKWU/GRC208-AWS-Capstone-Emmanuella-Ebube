@@ -10,7 +10,6 @@
 |**Institution**        |International Cybersecurity and Digital Forensics Academy (ICDFA)|
 |**Instructor**         |Aminu Idris                                                      |
 |**Date Deployed**      |April 9, 2026                                                    |
-|**Submission Deadline**|April 21, 2026                                                   |
 |**Environment**        |AWS Free Tier Personal Account                                   |
 |**AWS Account ID**     |562923011251                                                     |
 |**Region**             |us-east-1 (N. Virginia)                                          |
