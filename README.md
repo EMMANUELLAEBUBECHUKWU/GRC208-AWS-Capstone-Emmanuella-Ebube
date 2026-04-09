@@ -12,7 +12,6 @@
 **Course:** GRC208 — Governance, Risk, and Compliance Capstone
 
 **Instructor:** Aminu Idris
-
 **Submission Date:** April 21, 2026
 -----
 
