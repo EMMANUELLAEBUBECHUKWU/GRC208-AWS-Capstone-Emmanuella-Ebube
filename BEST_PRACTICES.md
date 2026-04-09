@@ -1,482 +1,135 @@
-# GRC Platform - Best Practices Guide
-
-## Table of Contents
-1. AWS Best Practices
-2. Security Best Practices
-3. Compliance Best Practices
-4. Operational Best Practices
-5. Development Best Practices
-
-## 1. AWS Best Practices
-
-### Infrastructure as Code (IaC)
-
-**Principle**: Manage all infrastructure through code for consistency and repeatability.
-
-**Implementation**:
-- Use CloudFormation templates for all infrastructure
-- Version control all templates in Git
-- Use parameters for environment-specific values
-- Implement stack policies to prevent accidental changes
-- Document all template parameters
-
-**Example**:
-```yaml
-Parameters:
-  EnvironmentName:
-    Type: String
-    Description: Environment name prefix
-    AllowedValues:
-      - dev
-      - staging
-      - prod
-```
-
-### Multi-AZ Deployment
-
-**Principle**: Distribute resources across multiple availability zones for high availability.
-
-**Implementation**:
-- Deploy RDS in Multi-AZ configuration
-- Use ALB with targets in multiple AZs
-- Replicate S3 buckets across regions
-- Configure DynamoDB global tables for critical data
-
-**Benefits**:
-- Automatic failover in case of AZ failure
-- Reduced downtime and improved reliability
-- Better disaster recovery capabilities
-
-### Least Privilege Access
-
-**Principle**: Grant only the minimum permissions required for each role.
-
-**Implementation**:
-```json
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Effect": "Allow",
-      "Action": [
-        "config:GetComplianceDetailsByConfigRule",
-        "config:DescribeComplianceByConfigRule"
-      ],
-      "Resource": "*"
-    }
-  ]
-}
-```
-
-**Best Practices**:
-- Use IAM roles instead of users for services
-- Implement resource-based policies
-- Use conditions to restrict access further
-- Regularly audit IAM permissions
-
-### Cost Optimization
-
-**Principle**: Optimize costs while maintaining performance and reliability.
-
-**Implementation**:
-- Use serverless services (Lambda, DynamoDB) for variable workloads
-- Implement S3 lifecycle policies for old data
-- Use Reserved Instances for predictable workloads
-- Monitor costs with AWS Cost Explorer
-- Set up billing alerts
-
-**Example S3 Lifecycle Policy**:
-```yaml
-LifecycleConfiguration:
-  Rules:
-    - Id: DeleteOldReports
-      Status: Enabled
-      ExpirationInDays: 365
-      Transitions:
-        - TransitionInDays: 90
-          StorageClass: GLACIER
-```
-
-## 2. Security Best Practices
-
-### Encryption
-
-**At Rest**:
-- Use AWS KMS for database encryption
-- Enable S3 server-side encryption
-- Encrypt DynamoDB tables
-- Use encrypted EBS volumes
-
-**In Transit**:
-- Use TLS 1.2+ for all communications
-- Enable HTTPS for ALB
-- Use VPC endpoints for AWS service access
-- Implement certificate pinning for APIs
-
-**Implementation**:
-```yaml
-StorageEncrypted: true
-KmsKeyId: !GetAtt DbEncryptionKey.Arn
-ServerSideEncryptionConfiguration:
-  - ServerSideEncryptionByDefault:
-      SSEAlgorithm: 'aws:kms'
-```
-
-### Network Security
-
-**VPC Configuration**:
-- Use public subnets only for load balancers
-- Place databases in private subnets
-- Use NAT Gateway for private subnet internet access
-- Implement security groups with least privilege
-
-**Security Group Rules**:
-```yaml
-SecurityGroupIngress:
-  - IpProtocol: tcp
-    FromPort: 3306
-    ToPort: 3306
-    SourceSecurityGroupId: !Ref EcsSecurityGroup
-```
-
-### Access Control
-
-**IAM Roles and Policies**:
-- Create separate roles for each service
-- Use role assumption for cross-account access
-- Implement MFA for sensitive operations
-- Enable CloudTrail for all API calls
-
-**Example Role**:
-```json
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Effect": "Allow",
-      "Principal": {"Service": "lambda.amazonaws.com"},
-      "Action": "sts:AssumeRole"
-    }
-  ]
-}
-```
-
-### Secrets Management
-
-**Best Practices**:
-- Use AWS Secrets Manager for sensitive data
-- Rotate credentials regularly
-- Never hardcode secrets in code
-- Use environment variables for configuration
-
-**Implementation**:
-```python
-import boto3
-secrets_client = boto3.client('secretsmanager')
-secret = secrets_client.get_secret_value(SecretId='grc-db-password')
-password = secret['SecretString']
-```
-
-## 3. Compliance Best Practices
-
-### Control Implementation
-
-**Principle**: Implement controls that map to compliance frameworks.
-
-**Steps**:
-1. Identify applicable compliance frameworks
-2. Map AWS services to framework controls
-3. Implement technical controls
-4. Document control implementation
-5. Automate compliance monitoring
-
-**Example Mapping**:
-| Framework | Control | AWS Service | Implementation |
-|-----------|---------|------------|-----------------|
-| ISO 27001 | A.7.1 | IAM | Role-based access control |
-| ISO 27001 | A.8.1 | KMS | Data encryption |
-| NIST | PR.AC-1 | Security Groups | Network access control |
-
-### Compliance Monitoring
-
-**Continuous Monitoring**:
-- Use AWS Config for resource compliance
-- Enable Security Hub for security findings
-- Implement CloudTrail for audit logging
-- Set up CloudWatch alarms for compliance violations
-
-**Configuration**:
-```yaml
-EventBridge Rule:
-  ScheduleExpression: "rate(1 hour)"
-  Targets:
-    - Arn: !GetAtt ComplianceMonitorLambda.Arn
-```
-
-### Evidence Collection
-
-**Automated Evidence**:
-- Collect CloudTrail logs for audit trails
-- Store compliance reports in S3
-- Maintain audit logs in CloudWatch
-- Document control evidence in database
-
-**Evidence Storage**:
-```python
-s3_client.put_object(
-    Bucket='grc-evidence-bucket',
-    Key=f'compliance-reports/{timestamp}-report.txt',
-    Body=report_content
-)
-```
-
-### Risk Management
-
-**Risk Assessment Process**:
-1. Identify risks from compliance gaps
-2. Assess probability and impact
-3. Calculate risk score
-4. Develop mitigation strategies
-5. Track remediation progress
-
-**Risk Scoring**:
-```python
-risk_score = probability * impact
-# Example: 0.7 (70% probability) * 8 (impact) = 5.6 risk score
-```
-
-## 4. Operational Best Practices
-
-### Monitoring and Alerting
-
-**CloudWatch Metrics**:
-- Monitor RDS CPU, memory, and storage
-- Track Lambda execution metrics
-- Monitor DynamoDB read/write capacity
-- Set up alarms for threshold violations
-
-**Example Alarm**:
-```bash
-aws cloudwatch put-metric-alarm \
-  --alarm-name grc-high-non-compliance \
-  --threshold 80 \
-  --comparison-operator LessThanThreshold \
-  --alarm-actions arn:aws:sns:us-east-1:ACCOUNT_ID:grc-alerts
-```
-
-### Logging and Auditing
-
-**Log Aggregation**:
-- Enable CloudTrail for all API calls
-- Enable RDS enhanced monitoring
-- Enable VPC Flow Logs
-- Centralize logs in CloudWatch
-
-**Log Retention**:
-```yaml
-LogRetentionInDays: 30
-```
-
-### Backup and Disaster Recovery
-
-**Backup Strategy**:
-- Enable RDS automated backups (30-day retention)
-- Create weekly manual snapshots
-- Replicate backups to another region
-- Test recovery procedures monthly
-
-**RDS Configuration**:
-```yaml
-BackupRetentionPeriod: 30
-PreferredBackupWindow: '03:00-04:00'
-MultiAZ: true
-```
-
-### Patch Management
-
-**Regular Updates**:
-- Apply AWS security patches automatically
-- Update Lambda runtime versions
-- Update RDS engine versions
-- Review and update dependencies
-
-### Performance Optimization
-
-**Database Optimization**:
-- Use appropriate instance types
-- Implement read replicas for scaling
-- Optimize queries and indexes
-- Monitor query performance
-
-**Lambda Optimization**:
-- Right-size memory allocation
-- Optimize function code
-- Use Lambda layers for shared code
-- Monitor execution duration
-
-## 5. Development Best Practices
-
-### Code Quality
-
-**Standards**:
-- Follow PEP 8 for Python code
-- Use type hints for functions
-- Implement comprehensive logging
-- Write unit tests for all functions
-
-**Example**:
-```python
-def calculate_risk_score(probability: float, impact: int) -> float:
-    """
-    Calculate risk score using probability and impact.
-    
-    Args:
-        probability: Risk probability (0-1)
-        impact: Risk impact (1-10)
-    
-    Returns:
-        Risk score (0-10)
-    """
-    logger.info(f"Calculating risk score: {probability} * {impact}")
-    return round(probability * impact, 2)
-```
-
-### Testing
-
-**Test Coverage**:
-- Unit tests for all functions
-- Integration tests for workflows
-- End-to-end tests for critical paths
-- Performance tests for scalability
-
-**Test Structure**:
-```python
-class TestComplianceMonitoring(unittest.TestCase):
-    def setUp(self):
-        """Set up test fixtures"""
-        pass
-    
-    def test_compliance_calculation(self):
-        """Test compliance percentage calculation"""
-        pass
-```
-
-### Documentation
-
-**Code Documentation**:
-- Document all functions with docstrings
-- Include usage examples
-- Document assumptions and constraints
-- Keep documentation up-to-date
-
-**Project Documentation**:
-- Maintain comprehensive README
-- Document architecture decisions
-- Create deployment guides
-- Document troubleshooting steps
-
-### Version Control
-
-**Git Workflow**:
-- Use feature branches for development
-- Create pull requests for code review
-- Require approval before merging
-- Tag releases with version numbers
-
-**Commit Messages**:
-```
-feat: Add compliance monitoring Lambda function
-- Implement AWS Config integration
-- Add DynamoDB storage for compliance status
-- Create SNS alerts for non-compliance
-```
-
-## 6. Compliance Framework Integration
-
-### ISO 27001:2022
-
-**Key Controls**:
-- A.5.1: Information Security Policies
-- A.6.1: Roles and Responsibilities
-- A.7.1: Access Control
-- A.8.1: Cryptography
-- A.9.1: Physical Security
-
-**AWS Implementation**:
-- IAM for access control
-- KMS for encryption
-- Security Groups for network security
-- CloudTrail for audit logging
-
-### NIST Cybersecurity Framework
-
-**Core Functions**:
-- Identify: Asset inventory and risk assessment
-- Protect: Access control and encryption
-- Detect: Monitoring and detection
-- Respond: Incident response procedures
-- Recover: Recovery procedures
-
-**AWS Services Mapping**:
-| Function | AWS Service |
-|----------|------------|
-| Identify | AWS Config, Inventory |
-| Protect | IAM, KMS, Security Groups |
-| Detect | Security Hub, CloudTrail |
-| Respond | Lambda, SNS |
-| Recover | RDS Backups, S3 Replication |
-
-## 7. Continuous Improvement
-
-### Regular Reviews
-
-**Monthly**:
-- Review compliance status
-- Analyze security findings
-- Check cost optimization
-- Update documentation
-
-**Quarterly**:
-- Audit IAM permissions
-- Review and update policies
-- Test disaster recovery
-- Update security baselines
-
-**Annually**:
-- Conduct security assessment
-- Review compliance frameworks
-- Plan infrastructure upgrades
-- Update disaster recovery procedures
-
-### Metrics and KPIs
-
-**Key Metrics**:
-- Compliance percentage
-- Mean time to detect (MTTD)
-- Mean time to respond (MTTR)
-- Risk score trend
-- Incident frequency
-
-**Tracking**:
-```python
-metrics = {
-    'compliance_percentage': 85.5,
-    'non_compliant_rules': 3,
-    'average_risk_score': 5.2,
-    'critical_risks': 1
-}
-```
-
-## Conclusion
-
-Following these best practices ensures:
-- Secure and compliant infrastructure
-- Reliable and scalable systems
-- Efficient operations and monitoring
-- Continuous improvement and optimization
-- Reduced risk and cost
-
-For more information, refer to:
-- AWS Well-Architected Framework
-- AWS Security Best Practices
-- Compliance framework documentation
+# Best Practices
+
+## GRC208 AWS Integrated GRC Platform
+
+### Emmanuella Ebubechukwu | 2025/GRC/10041
+
+This document captures the AWS and GRC best practices I observed and applied during the deployment of this capstone project. Some of these came from prior knowledge, some from the course material, and some I learned the hard way when things did not work as expected.
+
+-----
+
+## AWS Best Practices
+
+### 1. Never Use the Root Account for Day-to-Day Work
+
+The root account has unrestricted access to everything in an AWS account and cannot be limited by IAM policies. I created a dedicated IAM user called `emmanuella-admin` with AdministratorAccess and used that for the entire deployment. The root account was only used during the initial account setup.
+
+This is not just a recommendation — it is a basic access control principle. If the root account credentials were ever compromised, the damage would be total and irreversible.
+
+### 2. Enable MFA Before Doing Anything Else
+
+I enabled Multi-Factor Authentication on the `emmanuella-admin` IAM user before starting the deployment. This adds a second layer of verification beyond a password and is one of the simplest controls you can put in place against unauthorized account access.
+
+In a real GRC context, MFA on privileged accounts is a control requirement under ISO 27001, NIST, and most other frameworks. Enabling it on a test account costs nothing and takes less than five minutes.
+
+### 3. Set a Billing Alert Before Deploying Infrastructure
+
+I set a $10 budget alert before running any CloudFormation stacks. AWS charges begin the moment certain resources are created, and it is easy to lose track of what is running especially with RDS instances which continue billing as long as they are active.
+
+Setting the alert first meant I would be notified before costs got out of hand. On a Free Tier account, this is mandatory. On a production account, it is still good practice because unexpected costs are often the first sign that something has gone wrong.
+
+### 4. Use Infrastructure as Code for Everything
+
+All network and database infrastructure in this project was deployed using AWS CloudFormation templates. This means the entire environment can be torn down and rebuilt from scratch using the same files, with consistent results every time.
+
+Manually clicking through the AWS Console to create resources is fine for learning but it creates environments that are impossible to reproduce exactly, difficult to audit, and hard to version control. CloudFormation solves all three of those problems.
+
+### 5. Use Least Privilege for IAM Roles
+
+Each AWS service in this project got its own dedicated IAM role with only the permissions it needed. The Lambda function got the basic execution role and Config access. The Config recorder got the AWS managed Config role. CloudTrail got its own S3 bucket policy.
+
+I learned this the hard way during Phase 4. When I tried to use the Lambda role for the Config recorder, it failed with an InsufficientDeliveryPolicyException. The fix was to create a dedicated role for Config with the correct trust policy pointing to config.amazonaws.com. Least privilege is not just a security principle — it is also what makes services actually work correctly.
+
+### 6. Always Verify Stack Outputs Before Moving to the Next Phase
+
+After each CloudFormation stack completed, I ran a describe-stacks command with the Outputs query to confirm the expected resources had been created and their IDs were available for the next phase. The database stack imports subnet and security group IDs from the network stack using ImportValue, so if Phase 1 had not completed correctly, Phase 2 would have failed immediately.
+
+Checking outputs at each stage catches problems early before they cascade into harder-to-diagnose failures later.
+
+### 7. Use Separate S3 Buckets for Separate Purposes
+
+This project uses three S3 buckets: one for compliance evidence, one for compliance reports, and one for CloudTrail logs. Each bucket has its own access policy scoped to the specific service that needs it.
+
+Mixing audit logs, evidence files, and application data in a single bucket creates access control complexity and makes it harder to enforce retention policies or respond to audit requests. Separating them by purpose is cleaner and easier to manage.
+
+### 8. Encrypt Data at Rest
+
+All S3 buckets in this project use AES256 server-side encryption. While the original template included KMS encryption, that configuration was not compatible with a Free Tier account. AES256 encryption through S3-managed keys still provides encryption at rest without the additional cost of KMS.
+
+On a production account, KMS would be the right choice because it provides key rotation, usage auditing, and finer access control. For a Free Tier deployment, AES256 is a reasonable and still compliant approach.
+
+### 9. Validate CloudFormation Templates Before Deploying
+
+One of the lessons from Phase 2 was that the original database template had a structural error in the S3 encryption configuration that only surfaced at deployment time. Running aws cloudformation validate-template before deploying can catch syntax and structural errors before they cause a rollback.
+
+It does not catch every error, but it eliminates the simple ones and saves time.
+
+### 10. Always Test After Deployment
+
+After completing all five phases, I ran the full test suite with python3 test_cases.py. All 22 tests passed. Running tests after deployment confirms that the platform is functioning as expected and gives a documented record that the system was verified.
+
+Deploying without testing is not a deployment — it is just a hope.
+
+-----
+
+## GRC Best Practices
+
+### 1. Separate the Three Pillars: Governance, Risk, and Compliance
+
+Governance, risk management, and compliance are related but distinct functions. Governance sets the policies and frameworks. Risk management identifies and responds to threats. Compliance monitors adherence to those frameworks and policies.
+
+In this platform, these are reflected in separate DynamoDB tables: grc-controls for governance, grc-risk-register for risk, and grc-compliance-status for compliance. Keeping them separate makes it easier to query, report on, and update each function independently.
+
+### 2. Map Controls to Frameworks Explicitly
+
+A control that cannot be traced back to a specific framework requirement is difficult to defend during an audit. This platform supports six frameworks: ISO 27001, NIST Cybersecurity Framework, PCI DSS, HIPAA, GDPR, and SOC 2. Every control in the grc-controls table carries a framework field that links it to the relevant standard.
+
+During a real audit, the question is not just whether a control exists but whether it satisfies a specific requirement. Explicit mapping makes that answer easy to provide.
+
+### 3. Automate Compliance Monitoring Where Possible
+
+Manual compliance checks are slow, inconsistent, and easy to forget. AWS Config with continuous recording means resource configurations are monitored automatically and any drift from the expected state is detected without human intervention.
+
+The Lambda compliance monitor adds another layer by running automated checks and reporting on compliance percentages. Automation does not replace human judgment but it removes the dependency on someone remembering to check.
+
+### 4. Maintain an Audit Trail for Everything
+
+CloudTrail is enabled in this deployment and logs every API call made in the account. This means every CloudFormation stack creation, every IAM role change, every S3 bucket policy update — all of it is logged with a timestamp, the identity that made the call, and the source IP address.
+
+In a GRC context, an audit trail is not optional. It is the evidence that controls are being applied and that access is being monitored. Without it, compliance claims are unverifiable.
+
+### 5. Treat Evidence Collection as a Continuous Process
+
+The S3 evidence bucket in this project is not just a storage location. It is the repository for everything that would be needed to demonstrate compliance during an assessment: configuration snapshots from AWS Config, CloudTrail logs, compliance reports, and test results.
+
+Evidence should be collected continuously and organised systematically, not pulled together at the last minute before an audit. This project establishes that habit from the start.
+
+### 6. Apply the Principle of Least Privilege as a GRC Control
+
+Least privilege is both a security principle and a compliance requirement. Under ISO 27001 control A.9.2.3 and NIST AC-6, users and systems should have only the access they need to perform their function and nothing more.
+
+Every IAM role in this project was created with a specific purpose and a specific trust policy. No role was given broader permissions than necessary. This is not just good security practice — it is a documented control that can be shown to an auditor.
+
+### 7. Risk Assessment Should Be Quantitative
+
+The grc-risk-register table stores likelihood and impact as numeric values and calculates a risk score as likelihood multiplied by impact. This is a standard risk matrix approach and it makes risks comparable and prioritisable.
+
+A risk with a score of 20 (likelihood 4, impact 5) should be addressed before a risk with a score of 6 (likelihood 2, impact 3). Quantifying risk removes subjectivity and makes it easier to justify resource allocation decisions to leadership.
+
+### 8. Document Everything, Including What Went Wrong
+
+Three deployment issues were encountered during this project and all three are documented in the deployment guide with the exact error messages and the steps taken to resolve them. This kind of documentation has real value in a GRC context.
+
+When something fails in a production environment, the team needs to know what happened, why it happened, and what was done to fix it. A culture of honest documentation is part of what makes a GRC programme credible.
+
+### 9. Review Access Regularly
+
+Enabling MFA was a starting point but access control is not a one-time task. IAM permissions should be reviewed regularly to ensure that roles and users still have only what they need. Users who no longer need access should be removed. Roles that were created for a specific task and are no longer needed should be deleted.
+
+This project set up the roles needed for deployment. In a production environment, those roles would be reviewed after go-live to determine which ones are still needed and which can be removed.
+
+### 10. Compliance Is Not a Destination
+
+Completing this deployment and passing 22 tests does not mean the platform is permanently compliant. AWS Config is set to continuous recording precisely because compliance is an ongoing state, not a one-time achievement. Configurations change, new resources are added, and requirements evolve.
+
+The value of this platform is that it monitors continuously and provides the data needed to make informed decisions about the organisation’s compliance posture at any point in time.
