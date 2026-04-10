@@ -190,6 +190,5 @@ CloudTrail:       true
 |Item             |Detail                                                                       |
 |-----------------|-----------------------------------------------------------------------------|
 |GitHub Repository|https://github.com/EMMANUELLAEBUBECHUKWU/GRC208-AWS-Capstone-Emmanuella-Ebube|
-|Submission Date  |April 21, 2026                                                               |
 |Student          |Emmanuella Ebubechukwu                                                       |
 |Student ID       |2025/GRC/10041                                                               |
