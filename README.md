@@ -157,10 +157,15 @@ python3 test_cases.py
 
 **Monitoring and Audit**
 
-- AWS Config Recorder: `grc-recorder` — Recording (Continuous)
-- CloudTrail: `grc-trail` — Logging enabled
-- CloudTrail S3 Bucket: `grc-cloudtrail-logs-562923011251`
+**Monitoring and Audit**
 
+- AWS Config Recorder: `grc-recorder` — Recording (Continuous)
+- AWS Config Rules: `cloudtrail-enabled` (COMPLIANT), `s3-bucket-server-side-encryption-enabled` (COMPLIANT), `iam-password-policy` (NON_COMPLIANT)
+- Compliance Percentage: 66.67% — 2 of 3 rules compliant
+- Non-compliant rule: `iam-password-policy` — no custom IAM password policy set on Free Tier account
+- CloudTrail: `grc-trail` — Logging enabled, last delivery 2026-04-12
+- CloudTrail S3 Bucket: `grc-cloudtrail-logs-562923011251`
+- Lambda invocation result: compliance_percentage 66.67, non_compliant_rules 1, StatusCode 200
 -----
 
 ## Test Results
@@ -263,7 +268,7 @@ GRC208-AWS-Capstone-Emmanuella-Ebube/
 
 ## Screenshots
 
-All 23 deployment screenshots are available in the `screenshots/` folder. They cover every phase from identity verification through to final service verification, documented across both AWS CloudShell and the AWS Management Console.
+All 24 deployment screenshots are available in the `screenshots/` folder. They cover every phase from identity verification through to final service verification, documented across both AWS CloudShell and the AWS Management Console.
 
 -----
 
