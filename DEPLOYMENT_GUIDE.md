@@ -2,17 +2,17 @@
 
 ## GRC208 AWS Integrated GRC Platform
 
-|                       |                                                                 |
-|-----------------------|-----------------------------------------------------------------|
-|**Name**               |Emmanuella Ebubechukwu                                           |
-|**Student ID**         |2025/GRC/10041                                                   |
-|**Course**             |GRC208 - Governance, Risk, and Compliance                        |
-|**Institution**        |International Cybersecurity and Digital Forensics Academy (ICDFA)|
-|**Date Deployed**      |April 9, 2026                                                    |
-|**Environment**        |AWS Free Tier Personal Account                                   |
-|**AWS Account ID**     |562923011251                                                     |
-|**Region**             |us-east-1 (N. Virginia)                                          |
-|**IAM User**           |emmanuella-admin                                                 |
+|                  |                                                                 |
+|------------------|-----------------------------------------------------------------|
+|**Name**          |Emmanuella Ebubechukwu                                           |
+|**Student ID**    |2025/GRC/10041                                                   |
+|**Course**        |GRC208 - Governance, Risk, and Compliance                        |
+|**Institution**   |International Cybersecurity and Digital Forensics Academy (ICDFA)|
+|**Date Deployed** |April 9, 2026                                                    |
+|**Environment**   |AWS Free Tier Personal Account                                   |
+|**AWS Account ID**|562923011251                                                     |
+|**Region**        |us-east-1 (N. Virginia)                                          |
+|**IAM User**      |emmanuella-admin                                                 |
 
 This document is a record of how I deployed the AWS Integrated GRC Platform for my GRC208 capstone. It covers every command I ran, every error I encountered, and exactly how I resolved each one. Anyone following this guide on a personal AWS Free Tier account should be able to replicate the same deployment without running into the same issues I did.
 
@@ -257,13 +257,15 @@ Response:
 {"statusCode": 200, "body": "{\"message\": \"Compliance monitoring completed\", \"compliance_percentage\": 0, \"non_compliant_rules\": 0}"}
 ```
 
+Note: The compliance_percentage shows 0 here because AWS Config evaluation rules had not yet been created at this stage. The final verified result after adding Config rules in Phase 4 was 66.67%.
+
 Phase 3 completed successfully.
 
 -----
 
 ## Phase 4: AWS Config and CloudTrail
 
-This phase sets up continuous compliance recording with AWS Config and full audit logging with AWS CloudTrail.
+This phase sets up continuous compliance recording with AWS Config, creates evaluation rules for active compliance checking, and enables full audit logging with AWS CloudTrail.
 
 ### AWS Config Setup
 
@@ -347,6 +349,108 @@ aws configservice describe-configuration-recorders \
 ```
 
 The output confirmed recording frequency as CONTINUOUS and all supported resource types being recorded.
+
+### Create AWS Config Evaluation Rules
+
+After starting the recorder, I added three AWS managed Config rules to evaluate resources against compliance standards. Without these rules, Config records resource changes but does not evaluate them against any policy, meaning compliance results remain at 0.
+
+```bash
+aws configservice put-config-rule \
+  --config-rule '{
+    "ConfigRuleName": "s3-bucket-server-side-encryption-enabled",
+    "Source": {
+      "Owner": "AWS",
+      "SourceIdentifier": "S3_BUCKET_SERVER_SIDE_ENCRYPTION_ENABLED"
+    }
+  }' \
+  --region us-east-1
+
+aws configservice put-config-rule \
+  --config-rule '{
+    "ConfigRuleName": "cloudtrail-enabled",
+    "Source": {
+      "Owner": "AWS",
+      "SourceIdentifier": "CLOUD_TRAIL_ENABLED"
+    }
+  }' \
+  --region us-east-1
+
+aws configservice put-config-rule \
+  --config-rule '{
+    "ConfigRuleName": "iam-password-policy",
+    "Source": {
+      "Owner": "AWS",
+      "SourceIdentifier": "IAM_PASSWORD_POLICY"
+    }
+  }' \
+  --region us-east-1
+```
+
+After waiting 5 minutes for Config to evaluate all resources, I verified the compliance results:
+
+```bash
+aws configservice describe-config-rules \
+  --region us-east-1 \
+  --query 'ConfigRules[].ConfigRuleName'
+```
+
+Output:
+
+```json
+[
+    "cloudtrail-enabled",
+    "iam-password-policy",
+    "s3-bucket-server-side-encryption-enabled"
+]
+```
+
+```bash
+aws configservice get-compliance-summary-by-config-rule \
+  --region us-east-1
+```
+
+Output: 2 compliant, 1 non-compliant.
+
+I checked each rule individually:
+
+```bash
+aws configservice get-compliance-details-by-config-rule \
+  --config-rule-name cloudtrail-enabled \
+  --region us-east-1 \
+  --query 'EvaluationResults[0].ComplianceType'
+# "COMPLIANT"
+
+aws configservice get-compliance-details-by-config-rule \
+  --config-rule-name s3-bucket-server-side-encryption-enabled \
+  --region us-east-1 \
+  --query 'EvaluationResults[0].ComplianceType'
+# "COMPLIANT"
+
+aws configservice get-compliance-details-by-config-rule \
+  --config-rule-name iam-password-policy \
+  --region us-east-1 \
+  --query 'EvaluationResults[0].ComplianceType'
+# "NON_COMPLIANT"
+```
+
+The `iam-password-policy` rule is non-compliant because no custom IAM password policy has been configured on this Free Tier account. This is expected behaviour on a personal deployment account.
+
+I then invoked the Lambda function to confirm the final compliance percentage:
+
+```bash
+aws lambda invoke \
+  --function-name grc-compliance-monitor \
+  --region us-east-1 \
+  response.json && cat response.json
+```
+
+Response:
+
+```json
+{"statusCode": 200, "body": "{\"message\": \"Compliance monitoring completed\", \"compliance_percentage\": 66.67, \"non_compliant_rules\": 1}"}
+```
+
+Final compliance percentage: **66.67%** — 2 of 3 rules compliant.
 
 ### CloudTrail Setup
 
