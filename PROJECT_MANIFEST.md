@@ -2,17 +2,17 @@
 
 ## GRC208 AWS Integrated GRC Platform
 
-|                       |                                                                 |
-|-----------------------|-----------------------------------------------------------------|
-|**Name**               |Emmanuella Ebubechukwu                                           |
-|**Student ID**         |2025/GRC/10041                                                   |
-|**Course**             |GRC208 - Governance, Risk, and Compliance                        |
-|**Institution**        |International Cybersecurity and Digital Forensics Academy (ICDFA)|
-|**Date Deployed**      |April 9, 2026                                                    |
-|**Environment**        |AWS Free Tier Personal Account                                   |
-|**AWS Account ID**     |562923011251                                                     |
-|**Region**             |us-east-1 (N. Virginia)                                          |
-|**IAM User**           |emmanuella-admin                                                 |
+|                  |                                                                 |
+|------------------|-----------------------------------------------------------------|
+|**Name**          |Emmanuella Ebubechukwu                                           |
+|**Student ID**    |2025/GRC/10041                                                   |
+|**Course**        |GRC208 - Governance, Risk, and Compliance                        |
+|**Institution**   |International Cybersecurity and Digital Forensics Academy (ICDFA)|
+|**Date Deployed** |April 9, 2026                                                    |
+|**Environment**   |AWS Free Tier Personal Account                                   |
+|**AWS Account ID**|562923011251                                                     |
+|**Region**        |us-east-1 (N. Virginia)                                          |
+|**IAM User**      |emmanuella-admin                                                 |
 
 -----
 
@@ -80,33 +80,34 @@ This repository contains the complete submission for the GRC208 capstone project
 
 ### Screenshots Folder
 
-All 23 deployment screenshots are stored in the `screenshots/` folder. They cover the full deployment from identity verification through to final service confirmation.
+All 24 deployment screenshots are stored in the `screenshots/` folder. They cover the full deployment from identity verification through to final service confirmation.
 
-|Screenshot                                      |What It Shows                                                                    |
-|------------------------------------------------|---------------------------------------------------------------------------------|
-|`01_identity_verified`                          |AWS account identity confirmed via aws sts get-caller-identity                   |
-|`02_repo_cloned`                                |Instructor repository cloned and all project files listed                        |
-|`03_network_stack_create_complete`              |Phase 1 network stack showing CREATE_COMPLETE status                             |
-|`04_network_stack_outputs`                      |Network stack outputs table showing VPC, subnet, and security group IDs          |
-|`05_database_stack_create_complete`             |Phase 2 database stack showing CREATE_COMPLETE status                            |
-|`06_database_stack_outputs`                     |Database stack outputs showing RDS endpoint, S3 buckets, and DynamoDB tables     |
-|`07_lambda_function_created`                    |Phase 3 Lambda function creation output showing function ARN and configuration   |
-|`08_lambda_invocation_test`                     |Lambda test invocation returning StatusCode 200 and compliance monitoring message|
-|`09_config_recorder_running`                    |Phase 4 AWS Config recorder status showing CONTINUOUS recording                  |
-|`10_cloudtrail_created`                         |CloudTrail trail creation output showing trail name and S3 bucket                |
-|`11_cloudtrail_logging`                         |CloudTrail status showing IsLogging: True                                        |
-|`12_dynamodb_data_loaded`                       |Phase 5 DynamoDB table scans showing all three tables populated with sample data |
-|`13_tests_passing`                              |Test suite output showing 22 tests run and all passing                           |
-|`14_console_cloudformation_both_stacks_complete`|AWS Console CloudFormation page showing both stacks with CREATE_COMPLETE         |
-|`15_console_database_stack_outputs`             |AWS Console database stack Outputs tab                                           |
-|`16_console_network_stack_outputs`              |AWS Console network stack Outputs tab                                            |
-|`17_console_lambda_function`                    |AWS Console Lambda functions page showing grc-compliance-monitor                 |
-|`18_console_config_recording`                   |AWS Console Config Settings page showing Recording is on                         |
-|`19_console_cloudtrail_logging`                 |AWS Console CloudTrail Trails page showing grc-trail with logging enabled        |
-|`20_console_s3_buckets`                         |AWS Console S3 buckets list showing all three GRC buckets                        |
-|`21_console_dynamodb_tables`                    |AWS Console DynamoDB tables list showing all three GRC tables                    |
-|`22_console_iam_user`                           |AWS Console IAM Users page showing emmanuella-admin                              |
-|`23_final_verification`                         |CloudShell final verification showing all five services confirmed active         |
+|Screenshot                                      |What It Shows                                                                                                                                                                                   |
+|------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+|`01_identity_verified`                          |AWS account identity confirmed via aws sts get-caller-identity                                                                                                                                  |
+|`02_repo_cloned`                                |Instructor repository cloned and all project files listed                                                                                                                                       |
+|`03_network_stack_create_complete`              |Phase 1 network stack showing CREATE_COMPLETE status                                                                                                                                            |
+|`04_network_stack_outputs`                      |Network stack outputs table showing VPC, subnet, and security group IDs                                                                                                                         |
+|`05_database_stack_create_complete`             |Phase 2 database stack showing CREATE_COMPLETE status                                                                                                                                           |
+|`06_database_stack_outputs`                     |Database stack outputs showing RDS endpoint, S3 buckets, and DynamoDB tables                                                                                                                    |
+|`07_lambda_function_created`                    |Phase 3 Lambda function creation output showing function ARN and configuration                                                                                                                  |
+|`08_lambda_invocation_test`                     |Lambda test invocation returning StatusCode 200 and compliance monitoring message                                                                                                               |
+|`09_config_recorder_running`                    |Phase 4 AWS Config recorder status showing CONTINUOUS recording                                                                                                                                 |
+|`10_cloudtrail_created`                         |CloudTrail trail creation output showing trail name and S3 bucket                                                                                                                               |
+|`11_cloudtrail_logging`                         |CloudTrail status showing IsLogging: True                                                                                                                                                       |
+|`12_dynamodb_data_loaded`                       |Phase 5 DynamoDB table scans showing all three tables populated with sample data                                                                                                                |
+|`13_tests_passing`                              |Test suite output showing 22 tests run and all passing                                                                                                                                          |
+|`14_console_cloudformation_both_stacks_complete`|AWS Console CloudFormation page showing both stacks with CREATE_COMPLETE                                                                                                                        |
+|`15_console_database_stack_outputs`             |AWS Console database stack Outputs tab                                                                                                                                                          |
+|`16_console_network_stack_outputs`              |AWS Console network stack Outputs tab                                                                                                                                                           |
+|`17_console_lambda_function`                    |AWS Console Lambda functions page showing grc-compliance-monitor                                                                                                                                |
+|`18_console_config_recording`                   |AWS Console Config Settings page showing Recording is on                                                                                                                                        |
+|`19_console_cloudtrail_logging`                 |AWS Console CloudTrail Trails page showing grc-trail with logging enabled                                                                                                                       |
+|`20_console_s3_buckets`                         |AWS Console S3 buckets list showing all three GRC buckets                                                                                                                                       |
+|`21_console_dynamodb_tables`                    |AWS Console DynamoDB tables list showing all three GRC tables                                                                                                                                   |
+|`22_console_iam_user`                           |AWS Console IAM Users page showing emmanuella-admin                                                                                                                                             |
+|`23_final_verification`                         |CloudShell final verification showing all five services confirmed active                                                                                                                        |
+|`24_config_rules_compliance_verified`           |Config rules compliance check showing cloudtrail-enabled and s3-bucket-server-side-encryption-enabled as COMPLIANT, iam-password-policy as NON_COMPLIANT, and Lambda returning 66.67% compliance|
 
 -----
 
@@ -145,13 +146,16 @@ All 23 deployment screenshots are stored in the `screenshots/` folder. They cove
 
 ### Monitoring and Audit
 
-|Resource               |Type      |Value                           |
-|-----------------------|----------|--------------------------------|
-|Config Recorder        |AWS Config|grc-recorder                    |
-|Config Role            |IAM Role  |grc-config-role                 |
-|Config Delivery Channel|AWS Config|grc-channel                     |
-|Audit Trail            |CloudTrail|grc-trail                       |
-|CloudTrail Bucket      |S3        |grc-cloudtrail-logs-562923011251|
+|Resource                                              |Type           |Value                           |
+|------------------------------------------------------|---------------|--------------------------------|
+|Config Recorder                                       |AWS Config     |grc-recorder                    |
+|Config Role                                           |IAM Role       |grc-config-role                 |
+|Config Delivery Channel                               |AWS Config     |grc-channel                     |
+|Config Rule — cloudtrail-enabled                      |AWS Config Rule|COMPLIANT                       |
+|Config Rule — s3-bucket-server-side-encryption-enabled|AWS Config Rule|COMPLIANT                       |
+|Config Rule — iam-password-policy                     |AWS Config Rule|NON_COMPLIANT                   |
+|Audit Trail                                           |CloudTrail     |grc-trail                       |
+|CloudTrail Bucket                                     |S3             |grc-cloudtrail-logs-562923011251|
 
 -----
 
@@ -191,5 +195,6 @@ All 23 deployment screenshots are stored in the `screenshots/` folder. They cove
 |Database stack ROLLBACK_COMPLETE due to invalid S3 encryption property|Fixed the property name using sed, then replaced the full template with a Free Tier compatible version                                                                   |
 |AWS Config InsufficientDeliveryPolicyException                        |Created dedicated grc-config-role with AWS_ConfigRole policy and applied explicit S3 bucket policy for config.amazonaws.com                                              |
 |CloudTrail InsufficientS3BucketPolicyException                        |Applied explicit S3 bucket policy allowing cloudtrail.amazonaws.com to write to the logs bucket                                                                          |
+|AWS Config evaluation rules missing — compliance returned 0%          |Three AWS managed rules added: cloudtrail-enabled, iam-password-policy and s3-bucket-server-side-encryption-enabled. Final compliance percentage: 66.67%                 |
 |GitHub push rejected due to divergent branch history                  |Deleted the remote README and force pushed using git push –force                                                                                                         |
 |RDS direct connection not possible from CloudShell                    |RDS sits in a private subnet with no internet gateway route. Sample data was loaded into DynamoDB directly instead. All 22 tests passed confirming platform functionality|
