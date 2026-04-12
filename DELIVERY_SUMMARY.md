@@ -2,17 +2,17 @@
 
 ## GRC208 AWS Integrated GRC Platform
 
-|                       |                                                                             |
-|-----------------------|-----------------------------------------------------------------------------|
-|**Name**               |Emmanuella Ebubechukwu                                                       |
-|**Student ID**         |2025/GRC/10041                                                               |
-|**Course**             |GRC208 - Governance, Risk, and Compliance                                    |
-|**Institution**        |International Cybersecurity and Digital Forensics Academy (ICDFA)            |
-|**Date Deployed**      |April 9, 2026                                                                |
-|**Environment**        |AWS Free Tier Personal Account                                               |
-|**AWS Account ID**     |562923011251                                                                 |
-|**Region**             |us-east-1 (N. Virginia)                                                      |
-|**GitHub Repository**  |https://github.com/EMMANUELLAEBUBECHUKWU/GRC208-AWS-Capstone-Emmanuella-Ebube|
+|                     |                                                                             |
+|---------------------|-----------------------------------------------------------------------------|
+|**Name**             |Emmanuella Ebubechukwu                                                       |
+|**Student ID**       |2025/GRC/10041                                                               |
+|**Course**           |GRC208 - Governance, Risk, and Compliance                                    |
+|**Institution**      |International Cybersecurity and Digital Forensics Academy (ICDFA)            |
+|**Date Deployed**    |April 9, 2026                                                                |
+|**Environment**      |AWS Free Tier Personal Account                                               |
+|**AWS Account ID**   |562923011251                                                                 |
+|**Region**           |us-east-1 (N. Virginia)                                                      |
+|**GitHub Repository**|https://github.com/EMMANUELLAEBUBECHUKWU/GRC208-AWS-Capstone-Emmanuella-Ebube|
 
 -----
 
@@ -47,7 +47,7 @@ The AWS Integrated GRC Platform has been fully deployed, tested, and documented 
 
 |Deliverable                 |Status                |Notes                                                                    |
 |----------------------------|----------------------|-------------------------------------------------------------------------|
-|lambda_compliance_monitor.py|Deployed and tested   |Returns StatusCode 200                                                   |
+|lambda_compliance_monitor.py|Deployed and tested   |Returns StatusCode 200. Final compliance percentage: 66.67%              |
 |grc-dashboard.jsx           |Included in repository|Frontend deployment requires ECS Fargate which is outside Free Tier scope|
 |grc-dashboard.css           |Included in repository|Submitted alongside grc-dashboard.jsx as a complete frontend deliverable |
 
@@ -82,23 +82,26 @@ The AWS Integrated GRC Platform has been fully deployed, tested, and documented 
 
 ## AWS Resources Deployed and Verified
 
-|Service       |Resource                          |Status                |
-|--------------|----------------------------------|----------------------|
-|CloudFormation|grc-capstone-network-stack        |CREATE_COMPLETE       |
-|CloudFormation|grc-capstone-database-stack       |CREATE_COMPLETE       |
-|VPC           |vpc-00204003995d48e34             |Active                |
-|RDS MySQL     |grc-capstone-db                   |Available             |
-|S3            |grc-capstone-evidence-562923011251|Active                |
-|S3            |grc-capstone-reports-562923011251 |Active                |
-|S3            |grc-cloudtrail-logs-562923011251  |Active                |
-|DynamoDB      |grc-compliance-status             |Active                |
-|DynamoDB      |grc-risk-register                 |Active                |
-|DynamoDB      |grc-controls                      |Active                |
-|Lambda        |grc-compliance-monitor            |Active                |
-|IAM           |grc-lambda-role                   |Active                |
-|IAM           |grc-config-role                   |Active                |
-|AWS Config    |grc-recorder                      |Recording (Continuous)|
-|CloudTrail    |grc-trail                         |Logging               |
+|Service       |Resource                                |Status                |
+|--------------|----------------------------------------|----------------------|
+|CloudFormation|grc-capstone-network-stack              |CREATE_COMPLETE       |
+|CloudFormation|grc-capstone-database-stack             |CREATE_COMPLETE       |
+|VPC           |vpc-00204003995d48e34                   |Active                |
+|RDS MySQL     |grc-capstone-db                         |Available             |
+|S3            |grc-capstone-evidence-562923011251      |Active                |
+|S3            |grc-capstone-reports-562923011251       |Active                |
+|S3            |grc-cloudtrail-logs-562923011251        |Active                |
+|DynamoDB      |grc-compliance-status                   |Active                |
+|DynamoDB      |grc-risk-register                       |Active                |
+|DynamoDB      |grc-controls                            |Active                |
+|Lambda        |grc-compliance-monitor                  |Active                |
+|IAM           |grc-lambda-role                         |Active                |
+|IAM           |grc-config-role                         |Active                |
+|AWS Config    |grc-recorder                            |Recording (Continuous)|
+|AWS Config    |cloudtrail-enabled                      |COMPLIANT             |
+|AWS Config    |s3-bucket-server-side-encryption-enabled|COMPLIANT             |
+|AWS Config    |iam-password-policy                     |NON_COMPLIANT         |
+|CloudTrail    |grc-trail                               |Logging               |
 
 -----
 
@@ -138,20 +141,21 @@ OK
 
 ## Adjustments Made During Deployment
 
-Three issues were encountered during deployment and resolved. One limitation was documented transparently.
+Four issues were encountered during deployment and resolved. One limitation was documented transparently.
 
-|Item                       |What Happened                                                                                                             |How It Was Handled                                                                                              |
-|---------------------------|--------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------|
-|Database stack template    |Original template failed with ROLLBACK_COMPLETE due to invalid S3 encryption property and KMS incompatibility on Free Tier|Template replaced with a Free Tier compatible version using AES256 encryption and db.t3.micro RDS instance      |
-|AWS Config delivery channel|Failed when using the Lambda IAM role                                                                                     |Dedicated grc-config-role created with AWS_ConfigRole policy and explicit S3 bucket policy applied              |
-|CloudTrail S3 bucket       |Failed without a bucket policy                                                                                            |Explicit bucket policy applied allowing cloudtrail.amazonaws.com to write to the logs bucket                    |
-|sample_data.sql RDS loading|RDS sits in a private subnet with no internet gateway route. Direct connection from CloudShell was not possible           |Sample data loaded into DynamoDB directly. RDS instance is deployed and running. SQL file included in repository|
+|Item                       |What Happened                                                                                                             |How It Was Handled                                                                                                                                      |
+|---------------------------|--------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------|
+|Database stack template    |Original template failed with ROLLBACK_COMPLETE due to invalid S3 encryption property and KMS incompatibility on Free Tier|Template replaced with a Free Tier compatible version using AES256 encryption and db.t3.micro RDS instance                                              |
+|AWS Config delivery channel|Failed when using the Lambda IAM role                                                                                     |Dedicated grc-config-role created with AWS_ConfigRole policy and explicit S3 bucket policy applied                                                      |
+|CloudTrail S3 bucket       |Failed without a bucket policy                                                                                            |Explicit bucket policy applied allowing cloudtrail.amazonaws.com to write to the logs bucket                                                            |
+|AWS Config evaluation rules|Config recorder was active but no evaluation rules existed, meaning compliance results returned 0%                        |Three AWS managed rules added: cloudtrail-enabled, iam-password-policy and s3-bucket-server-side-encryption-enabled. Final compliance percentage: 66.67%|
+|sample_data.sql RDS loading|RDS sits in a private subnet with no internet gateway route. Direct connection from CloudShell was not possible           |Sample data loaded into DynamoDB directly. RDS instance is deployed and running. SQL file included in repository                                        |
 
 -----
 
 ## Screenshots
 
-23 deployment screenshots are included in the `screenshots/` folder covering every phase of the deployment from identity verification through to final service confirmation across both AWS CloudShell and the AWS Management Console.
+24 deployment screenshots are included in the `screenshots/` folder covering every phase of the deployment from identity verification through to final service confirmation across both AWS CloudShell and the AWS Management Console.
 
 -----
 
@@ -182,6 +186,19 @@ Lambda Function:  "Active"
 Config Recorder:  true
 CloudTrail:       true
 ```
+
+Config compliance verified on April 12, 2026:
+
+```
+cloudtrail-enabled:                       COMPLIANT
+s3-bucket-server-side-encryption-enabled: COMPLIANT
+iam-password-policy:                      NON_COMPLIANT
+Compliance Percentage:                    66.67%
+Non-Compliant Rules:                      1
+Lambda StatusCode:                        200
+```
+
+The `iam-password-policy` rule is non-compliant because no custom IAM password policy has been configured on this Free Tier account. This is expected behaviour on a personal deployment account.
 
 -----
 
