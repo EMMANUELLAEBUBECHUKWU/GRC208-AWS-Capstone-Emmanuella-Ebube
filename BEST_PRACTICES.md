@@ -106,6 +106,8 @@ AWS Config is running with continuous recording across all supported resource ty
 
 Compliance checked only once a week is a snapshot, not a posture. In a cloud environment where a misconfigured resource can be created and deleted in minutes, a weekly scan would miss it entirely. Continuous monitoring is the only approach that gives you an accurate picture at any given moment.
 
+In this deployment, three AWS managed rules were added to actively evaluate resources: `cloudtrail-enabled` and `s3-bucket-server-side-encryption-enabled` both returned COMPLIANT, while `iam-password-policy` returned NON_COMPLIANT because no custom password policy has been configured on this Free Tier account. The final compliance percentage verified by Lambda invocation was 66.67%.
+
 ### Link Every Control to a Framework
 
 The grc-controls DynamoDB table stores a framework field with every control record. This is not just an organisational choice. It is the difference between answering an auditor’s question in thirty seconds and spending hours searching for the answer.
