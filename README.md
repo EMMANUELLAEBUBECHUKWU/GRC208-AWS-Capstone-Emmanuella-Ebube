@@ -9,7 +9,6 @@
 |**Programme**      |GRC Engineering (CGRCE)                                          |
 |**Institution**    |International Cybersecurity and Digital Forensics Academy (ICDFA)|
 |**Course**         |GRC208 — Governance, Risk, and Compliance Capstone               |
-|**Submission Date**|April 21, 2026                                                   |
 
 -----
 
