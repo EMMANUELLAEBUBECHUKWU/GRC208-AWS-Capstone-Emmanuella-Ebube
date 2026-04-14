@@ -16,7 +16,7 @@
 
 This repository contains my capstone submission for GRC208. The project involved designing and deploying a fully functional AWS Integrated GRC Platform from scratch on a personal AWS Free Tier account. The platform demonstrates practical, hands-on implementation of governance, risk, and compliance management using AWS native services.
 
-Governance, Risk, and Compliance (GRC) is a critical function in any organisation that handles sensitive data or operates under regulatory requirements. This project translates GRC principles into a real cloud architecture — moving beyond theory to show how compliance monitoring, risk tracking, audit logging, and access control work together in a live environment.
+Governance, Risk, and Compliance (GRC) is a critical function in any organisation that handles sensitive data or operates under regulatory requirements. This project translates GRC principles into a real cloud architecture, moving beyond theory to show how compliance monitoring, risk tracking, audit logging, and access control work together in a live environment.
 
 The deployment was carried out entirely through AWS CloudShell using Infrastructure as Code (CloudFormation). All five phases were completed successfully, verified, and documented with screenshots. The platform supports six major compliance frameworks: ISO 27001, NIST Cybersecurity Framework, PCI DSS, HIPAA, GDPR, and SOC 2.
 
